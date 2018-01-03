@@ -1,0 +1,38 @@
+{
+  "name": "md-date-range-picker",
+  "version": "0.8.1",
+  "description": "Angular Material Date Range Picker",
+  "main": [
+    "./dist/md-date-range-picker.js",
+    "./dist/md-date-range-picker.css"
+  ],
+  "authors": [
+    "Roel Barreto <greatcodeideas@gmail.com>"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "angular",
+    "material",
+    "date",
+    "range",
+    "picker"
+  ],
+  "homepage": "http://greatcodeideas.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "0.8.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.8.1",
+    "commit": "b5604e1a63bf20397b61b92bcb2c6d6e0f1a5ca9"
+  },
+  "_source": "https://github.com/greatCodeIdeas/md-date-range-picker.git",
+  "_target": "^0.8.1",
+  "_originalSource": "md-date-range-picker",
+  "_direct": true
+}

@@ -1,0 +1,31 @@
+<div flex="60" layout="row" layout-align="center center">
+    <md-dialog aria-label="Login dialog" flex="45">
+        <form name="OtpForm" ng-submit="otp_submit()" novalidate="">
+            <md-list flex="">
+                <md-subheader class="md-no-sticky">
+                    OTP Varification
+                </md-subheader>
+                <md-list-item>
+                    <md-input-container flex="100">
+                        <label for="otp">
+                            OTP
+                        </label>
+                        <input name="otp" ng-model="otp" required="" type="text" ng-maxlength="4" ng-minlength="4" ng-pattern="/^[0-9]*$/"/>
+                        
+                        <span class="help-block" ng-show="OtpForm.otp.$error.required && (!OtpForm.$pristine || OtpForm.$submitted)">Please Enter OTP</span><br>
+                        <span class="help-block" ng-show="OtpForm.otp.$error.pattern && (!OtpForm.$pristine || OtpForm.$submitted)">OTP must be Numeric</span><br>
+                        <span class="help-block" ng-show="OtpForm.otp.$error.maxlength && (!OtpForm.$pristine || OtpForm.$submitted)">OTP Must Have 4 Digits</span><br>
+                        <span class="help-block" ng-show="OtpForm.otp.$error.minlength && (!OtpForm.$pristine || OtpForm.$submitted)">OTP Must Have 4 Digits</span><br>
+
+                    </md-input-container>
+                </md-list-item>
+            </md-list>
+            <div layout="row" layout-align="end center">
+
+                <md-button ng-click="OtpForm.$valid && send_otp_varify()" type="button" ng-disabled="isDisabled || OtpForm.$invalid">
+                    Varify
+                </md-button>
+            </div>
+        </form>
+    </md-dialog>
+</div>

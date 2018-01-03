@@ -1,0 +1,47 @@
+<div flex="60" layout="row" layout-align="center center">
+    <md-dialog aria-label="Login dialog" flex="45">
+        <form name="LoginForm" ng-submit="loginFormSubmit()" novalidate="">
+            <md-list flex="">
+                <md-subheader class="md-no-sticky">
+                    Authentication Required
+                </md-subheader>
+                <md-list-item>
+                    <md-input-container flex="100">
+                        <label for="username">
+                            Username
+                        </label>
+                        <input name="username" ng-model="username" required="required" type="email"/>
+                        
+                        <span class="help-block" ng-show="LoginForm.username.$error.required && (!LoginForm.$pristine || LoginForm.$submitted)">Please Enter Email ID</span>
+                        <span class="help-block" ng-show="LoginForm.username.$error.email && (!LoginForm.$pristine || LoginForm.$submitted)">Please Enter Valid Email ID</span>
+
+                    </md-input-container>
+                </md-list-item>
+                <md-list-item>
+                    <md-input-container flex="100">
+                        <label for="password">
+                            Password
+                        </label>
+                        <input name="password" ng-model="password" required="" type="password"/>
+                        <div ng-message="password" ng-show="error.password">
+                            {{msg}}
+                        </div>
+                    </md-input-container>
+                </md-list-item>
+            </md-list>
+            <div layout="row" layout-align="end center">
+
+                <md-button ng-click="send_otp()" type="button" ng-disabled="isDisabled || LoginForm.$valid">
+                    Send OTP
+                </md-button>
+
+                <md-button ng-click="closeDialog()" type="button">
+                    Cancel
+                </md-button>
+                <md-button ng-disabled="LoginForm.$invalid" type="submit">
+                    Login
+                </md-button>
+            </div>
+        </form>
+    </md-dialog>
+</div>
