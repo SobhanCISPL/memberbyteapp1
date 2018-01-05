@@ -1,5 +1,5 @@
 angular.module('memberByteLoginApp', [
-	'ngMaterial', 'ngSanitize'
+	'ngMaterial', 'ngSanitize', 'ngAnimate'
 	])
 .config(function ($mdThemingProvider) {
 	$mdThemingProvider
@@ -23,11 +23,26 @@ angular.module('memberByteLoginApp', [
 		}
 	};
 })
+.factory('Dialog', function ($mdDialog) {
+	return {
+		alertDialog: function (text) {
+			return $mdDialog.show(
+				$mdDialog.alert()
+				.parent(angular.element(document.querySelector('#popupContainer')))
+				.clickOutsideToClose(true)
+				.textContent(text)
+				.ariaLabel('Alert')
+				.ok('Okay!')
+				);
+		}
 
-.controller('LoginIndexCtrl', function ($scope, $mdDialog, $http, $mdToast, Toast) {
+	};
+})
+
+.controller('LoginIndexCtrl', function ($scope, $mdDialog, $http, $mdToast, Toast, Dialog) {
 
 	if(ERROR !== '' && ERROR.success === false && ERROR.error_message != ''){
-		Toast.showToast(ERROR.error_message);
+		Dialog.alertDialog(ERROR.error_message);
 	}
 
 	$scope.thirdPartyLogin = function(login_driver){
@@ -68,7 +83,7 @@ angular.module('memberByteLoginApp', [
 
 							$scope.send_otp = function (ev) {
 								if(!$scope.username){
-									Toast.showToast("Usename can't be left blank!");
+									Toast.showToast("Email ID can't be left blank!");
 									
 									$scope.loader = false; // loader hide
 									$scope.dialog = false; 
@@ -100,16 +115,29 @@ angular.module('memberByteLoginApp', [
 
 										if(response.data.param == 400) {
 											var confirm = $mdDialog.confirm()
-										          .title('Sorry!')
-										          .textContent(response.data.error_message)
-										          .ariaLabel('Lucky day')
-										          .targetEvent(ev)
-										          .ok('Okay');
+											.title('Sorry!')
+											.textContent(response.data.error_message)
+											.ariaLabel('Lucky day')
+											.targetEvent(ev)
+											.ok('Okay');
 
-										    $mdDialog.show(confirm).then(function() {
-										    	$scope.isDisabled = false; 
-										      	location.reload();
-										    });
+											$mdDialog.show(confirm).then(function() {
+												$scope.isDisabled = false; 
+												// location.reload();
+											});
+										}
+
+										if(response.data.param == 404) {
+											var confirm = $mdDialog.confirm()
+											.textContent(response.data.error_message)
+											.ariaLabel('Lucky day')
+											.targetEvent(ev)
+											.ok('Okay');
+
+											$mdDialog.show(confirm).then(function() {
+												$scope.isDisabled = false; 
+												// location.reload();
+											});
 										}
 									});
 								}								
@@ -117,7 +145,7 @@ angular.module('memberByteLoginApp', [
 
 							$scope.send_otp_varify = function (ev){
 								if(!$scope.otp){
-									Toast.showToast("OTP field can't be left blank!");
+									Toast.showToast(APP_MESSAGES.OTP.BLANK);
 									return false;
 								}else{
 									$scope.isDisabled = true;
@@ -148,11 +176,11 @@ angular.module('memberByteLoginApp', [
 										}
 
 										if(response.data.param == 404){
-											Toast.showToast("Please provide valid OTP");
+											Toast.showToast(APP_MESSAGES.OTP.ERROR_OTP);
 											$scope.isDisabled = false;
 
 											$scope.loader = false; // loader hide
- 											$scope.dialog = false; 
+											$scope.dialog = false; 
 
 											return false;
 										}
@@ -162,7 +190,7 @@ angular.module('memberByteLoginApp', [
 
 							$scope.change_pw = function (ev) {
 								if(!$scope.new_password && !$scope.confirm_password){
-									Toast.showToast("Password & Confirm can't be left blank!");
+									Toast.showToast(APP_MESSAGES.PASSWORD.BLANK);
 									return false;
 								}else{
 									var pw = $scope.new_password;
@@ -170,7 +198,7 @@ angular.module('memberByteLoginApp', [
 									var user_email_id = email_id;
 
 									if(pw  != confirm_pw){
-										Toast.showToast("Password & Confirm Password should be same!");
+										Toast.showToast(APP_MESSAGES.PASSWORD.WARNING);
 										return false;
 									}else{
 										$scope.isDisabled = true;
@@ -187,46 +215,46 @@ angular.module('memberByteLoginApp', [
 											if(response.data.param == 100){
 												
 												var confirm = $mdDialog.confirm()
-											          .title('Confirmation!')
-											          .textContent(response.data.message)
-											          .ariaLabel('Lucky day')
-											          .targetEvent(ev)
-											          .ok('Okay');
+												.title('Confirmation!')
+												.textContent(response.data.message)
+												.ariaLabel('Lucky day')
+												.targetEvent(ev)
+												.ok('Okay');
 
-											    $mdDialog.show(confirm).then(function() {
-											    	$scope.isDisabled = false; 
-											      	location.reload();
-											    });
+												$mdDialog.show(confirm).then(function() {
+													$scope.isDisabled = false; 
+													// location.reload();
+												});
 											}
 
 											if(response.data.param == 200){
 
 												var confirm = $mdDialog.confirm()
-											          .title('Confirmation!')
-											          .textContent(response.data.message)
-											          .ariaLabel('Lucky day')
-											          .targetEvent(ev)
-											          .ok('Okay');
+												.title('Confirmation!')
+												.textContent(response.data.message)
+												.ariaLabel('Lucky day')
+												.targetEvent(ev)
+												.ok('Okay');
 
-											    $mdDialog.show(confirm).then(function() {
-											    	$scope.isDisabled = false; 
-											      	location.reload();
-											    });
+												$mdDialog.show(confirm).then(function() {
+													$scope.isDisabled = false; 
+													// location.reload();
+												});
 											}
 
 											if(response.data.param == 333){
 
 												var confirm = $mdDialog.confirm()
-											          .title('Sorry!')
-											          .textContent(response.data.error_message)
-											          .ariaLabel('Lucky day')
-											          .targetEvent(ev)
-											          .ok('Okay');
+												.title('Sorry!')
+												.textContent(response.data.error_message)
+												.ariaLabel('Lucky day')
+												.targetEvent(ev)
+												.ok('Okay');
 
-											    $mdDialog.show(confirm).then(function() {
-											    	$scope.isDisabled = false; 
-											      	location.reload();
-											    });
+												$mdDialog.show(confirm).then(function() {
+													$scope.isDisabled = false; 
+													// location.reload();
+												});
 											}
 										});
 									}

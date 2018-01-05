@@ -4,8 +4,7 @@ namespace App;
 
 use DB;
 use Exception;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SendOTP;
+use App\Email\Email;
 
 class User
 {
@@ -32,7 +31,7 @@ class User
             }
             elseif(count($user) > 0){
                 if($user[0]['login_type'] !== $userDetail['login_type']){
-                    throw new Exception('Email Id already exists');
+                    throw new Exception('Email Id already exists', 999);
                     // return false;
                 }
                 $user = json_decode(json_encode($user),1);
@@ -45,7 +44,7 @@ class User
             return $result;
         }
         catch(Exception $ex){
-            throw new Exception($ex->getMessage());
+            throw new Exception($ex->getMessage(), $ex->getCode());
         }
     }
 
@@ -77,6 +76,7 @@ class User
                 $query->where($key, $value);
             }
         }
+
         return $query->update($values);
 
     }
@@ -106,40 +106,18 @@ class User
         //check user with user table
         $condition1 = ['email' => $email ];
         $user1 = $this->getUser($condition1);
-
-        // print_r($user1);
-        // die();
         //end
         
-        $rand = rand(1999,9999);
+        $rand = rand(111111,999999);
+
+        $this->Email = new Email();
 
         if(count($user) === 0 ){
 
             if (count($user1) === 0) {
                 $data = array('otp'=>$rand);
-                Mail::send('otp', $data, function($message) use ($email) {
-                    $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
-
-                    $message->to($email)->subject('Login OTP!');           
-                });
-
-                $values = [
-                    'email_id' => $email,
-                    'otp' => $rand,
-                    'created_at' => CURR_DATE_TIME_EST
-                ];
-                $result = $this->insertUser($query, $values);
-
-                return 1;
-            }elseif(count($user1) > 0){
-                if($user1[0]->login_type == 3){
-                    $data = array('otp'=>$rand);
-                    Mail::send('otp', $data, function($message) use ($email) {
-                        $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
-
-                        $message->to($email)->subject('Login OTP!');           
-                    });
-
+                $mail = $this->Email->sendEmail($email,$data);
+                if(!empty($mail)){
                     $values = [
                         'email_id' => $email,
                         'otp' => $rand,
@@ -148,6 +126,22 @@ class User
                     $result = $this->insertUser($query, $values);
 
                     return 1;
+                }
+
+            }elseif(count($user1) > 0){
+                if($user1[0]->login_type == 3){
+                    $data = array('otp'=>$rand);
+                    $mail = $this->Email->sendEmail($email,$data);
+                    if(!empty($mail)){
+                        $values = [
+                            'email_id' => $email,
+                            'otp' => $rand,
+                            'created_at' => CURR_DATE_TIME_EST
+                        ];
+                        $result = $this->insertUser($query, $values);
+
+                        return 1;
+                    }
                 }else{
                     return "Exist";
                 }
@@ -161,32 +155,8 @@ class User
                 if (count($user1) === 0) {
 
                     $data = array('otp'=>$rand);
-                    Mail::send('otp', $data, function($message) use ($email) {
-                        $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
-
-                        $message->to($email)->subject('Login OTP!');           
-                    });
-
-                    $user = json_decode(json_encode($user),1);
-                    $values = [
-                        'otp' => $rand,
-                        'created_at' => CURR_DATE_TIME_EST
-                    ];
-                    $condition = ['id' => $user[0]['id']];
-                    $result = $this->updateUserForOtpTable($query, $condition, $values);
-
-                    if($result){
-                        return 3;
-                    }
-                }elseif (count($user1) > 0) {
-                    if($user1[0]->login_type == 3){
-                        $data = array('otp'=>$rand);
-                        Mail::send('otp', $data, function($message) use ($email) {
-                            $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
-
-                            $message->to($email)->subject('Login OTP!');           
-                        });
-
+                    $mail = $this->Email->sendEmail($email,$data);
+                    if(!empty($mail)){
                         $user = json_decode(json_encode($user),1);
                         $values = [
                             'otp' => $rand,
@@ -197,6 +167,26 @@ class User
 
                         if($result){
                             return 3;
+                        }
+                    }
+
+                    
+                }elseif (count($user1) > 0) {
+                    if($user1[0]->login_type == 3){
+                        $data = array('otp'=>$rand);
+                        $mail = $this->Email->sendEmail($email,$data);
+                        if(!empty($mail)){
+                            $user = json_decode(json_encode($user),1);
+                            $values = [
+                                'otp' => $rand,
+                                'created_at' => CURR_DATE_TIME_EST
+                            ];
+                            $condition = ['id' => $user[0]['id']];
+                            $result = $this->updateUserForOtpTable($query, $condition, $values);
+
+                            if($result){
+                                return 3;
+                            }
                         }
                     }else{
                         return "Exist";
@@ -258,6 +248,7 @@ class User
         $query = DB::table($this->table);
         $condition = ['email' => $email, 'login_type' => 3];
         $user = $this->getUser($condition);
+
         if(count($user) === 0 ){
             $values = [
                 'name' => $first_name.' '.$last_name,
@@ -279,7 +270,7 @@ class User
             $condition = ['id' => $user[0]['id']];
             $result = $this->updateUser($query, $condition, $values);
 
-            if($result){
+            if(!empty($result)){
                 return 2;
             }
         }

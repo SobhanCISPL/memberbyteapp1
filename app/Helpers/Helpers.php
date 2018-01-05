@@ -37,3 +37,13 @@ if(!function_exists('toSql')){
 		return false;
 	}
 }
+
+if(!function_exists('objToArray')){
+	function objToArray($obj)
+	{
+		if($obj){
+			return json_decode(json_encode($obj), true);
+		}
+		return false;
+	}
+}
