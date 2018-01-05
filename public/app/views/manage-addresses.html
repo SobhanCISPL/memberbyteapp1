@@ -1,0 +1,38 @@
+<flat-button-directive url='#/address-add' title='Address' type='add'></flat-button-directive>
+<div layout = "row" layout-align="center" md-whiteframe="3" layout-padding layout-margin  style="background: white">
+  <md-content class="md-padding dialog-max-style">
+   <div layout = "row" layout-padding>
+    <div flex><b>#</b></div>
+    <div flex><b>City</b></div>
+    <div flex><b>Zip/Postal</b></div>
+    <div flex><b>Country</b></div>
+    <div flex><b>State</b></div>
+    <div flex><b>Address</b></div>
+    <div flex="10" layout="row" layout-align="center start"><b>Actions</b></div>
+  </div>
+  <md-divider></md-divider>
+  <div layout = "row" layout-padding ng-repeat-start="address in addresses">
+    <div flex>{{address.id}}</div>
+    <div flex>{{address.city}}</div>
+    <div flex >{{address.zip}}</div>
+    <div flex >{{address.country}}</div>
+    <div flex >{{address.state}}</div>
+    <div flex >{{address.my_address}}</div>
+    <div flex="10" layout="row" layout-align="center start">
+        <i class="material-icons" ng-click="editAddress(address.id)">
+          <md-tooltip
+            md-direction="top">
+            Edit
+          </md-tooltip>&#xE254;</i> &nbsp; 
+        <i class="material-icons"  aria-hidden="true" ng-click="deleteAddress(address.id);
+              $event.stopPropagation();">
+          <md-tooltip
+            md-direction="top">
+            Delete
+          </md-tooltip>
+          &#xE872;</i>
+      </div>
+  </div>
+  <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+</md-content>
+</div>

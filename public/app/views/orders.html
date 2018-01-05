@@ -1,13 +1,46 @@
-<div layout = "row" layout-align="center" md-whiteframe="3" layout-padding layout-margin  style="background: white">
-	<div layout="row">
-		<md-list ng-cloak>
-			<md-list-item ng-repeat="order in orderss" class="noright">
-				<!-- <i class="material-icons md-avatar" style="font-size: 48px; color: #ccc;">&#xE8CC;</i>
-				<p>order name</p> -->
-				<!-- <i class="material-icons  md-secondary" >more_vert</i>
-				<i class="material-icons  md-secondary md-hue-3" >remove_red_eye</i> -->
-				<!-- <md-icon class="md-secondary" aria-label="Chat" md-svg-icon="communication:message"></md-icon> -->
-			</md-list-item>
-		</md-list>
+<div layout="row" layout-margin layout-align="end center">
+	<md-date-range 
+	custom-templates="customTemplates"
+	ng-model="pickerModel"
+	auto-confirm="true"
+	show-template="false"
+	one-panel="true"
+	></md-date-range>
+	<md-button class="md-button" aria-label="Settings" ng-click="orderFilter()">
+		Filter
+	</md-button>
+</div>
+
+<div layout="column" md-whiteframe="3" layout-margin layout-align="center center" flex ng-hide="loader_circle" class="white-back loading-text-div">
+	<md-progress-circular md-mode="indeterminate"  md-diameter="100"></md-progress-circular>
+	<span>Loading orders...</span>
+</div>
+
+<div layout="column"  ng-hide="loaded_content">
+	<div layout="row" layout-wrap="">
+		<md-card ng-repeat="id in orders" md-theme="default" md-theme-watch flex="30" layout-alignment="stretch">
+			<md-card-title>
+				<md-card-title-text>
+					<span class="">Order ID</span>
+					<span class="md-subhead">{{id}}</span>
+				</md-card-title-text>
+				<md-card-title-media>
+					<div class="md-media-sm card-media">
+						<i class="material-icons" style="font-size: 72px; color: #ccc;">&#xE8CC;</i>
+					</div>
+				</md-card-title-media>
+			</md-card-title>
+			<md-card-actions layout="row" layout-align="end center" class="dashboard-card-actions">
+				<md-button class="md-icon-button" aria-label="Settings">
+					<md-tooltip md-direction="top" md-visible="tooltipVisible">More</md-tooltip>
+					<i class="material-icons">&#xE5CF;</i>
+				</md-button>
+				<md-button class="md-icon-button" aria-label="Settings" ng-click="viewOrder(id)">
+					<md-tooltip md-direction="top" md-visible="tooltipVisible">View Order</md-tooltip>
+					<i class="material-icons">&#xE417;</i>
+				</md-button>
+			</md-card-actions>
+		</md-card>
 	</div>
+
 </div>

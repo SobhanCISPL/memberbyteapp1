@@ -29,7 +29,7 @@ class Limelight
     public static function instance($api_info)
     {
         if (empty($api_info['endpoint']) || empty($api_info['username']) || empty($api_info['password'])) {
-            throw new \Exception('API credential could not be blank.', 999);
+            throw new \Exception('API credential could not be blank.', 9999);
         }
         if (self::$inst === null) {
             $calledClassName = get_called_class();
@@ -46,32 +46,43 @@ class Limelight
      */
     public function forceBillOrder($order_id, $force_gateway = '', $preserve_force_gateway = 0)
     {
-        $response = "";
-        if (!empty($order_id)) {
-            $this->fields = [
-                'order_id' => $order_id,
-            ];
-            if (!empty($force_gateway)) {
-                $this->fields['forceGatewayId']         = $force_gateway;
-                $this->fields['preserve_force_gateway'] = $preserve_force_gateway;
+        try {
+            $response = "";
+            if (!empty($order_id)) {
+                $this->fields = [
+                    'order_id' => $order_id,
+                ];
+                if (!empty($force_gateway)) {
+                    $this->fields['forceGatewayId']         = $force_gateway;
+                    $this->fields['preserve_force_gateway'] = $preserve_force_gateway;
+                }
+                $response = $this->__post('order_force_bill');
             }
-            $response = $this->__post('order_force_bill');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
+        
     }
 
-    public function orderUpdate($order_id, $action, $value)
+    public function orderUpdate($order_id, $action, $value, $sync_all=0)
     {
-        $response = "";
-        if (!empty($order_id) && !empty($action) && !empty($value)) {
-            $this->fields = [
-                'order_ids' => $order_id,
-                'actions'   => $action,
-                'values'    => $value,
-            ];
-            $response = $this->__post('order_update');
+        try {
+            $response = "";
+            if (!empty($order_id) && !empty($action) && !empty($value)) {
+                $this->fields = [
+                    'order_ids' => $order_id,
+                    'sync_all'  => $sync_all,
+                    'actions'   => $action,
+                    'values'    => $value,
+                ];
+                $response = $this->__post('order_update');
+            }
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
+        
     }
 
     /**
@@ -82,21 +93,25 @@ class Limelight
      */
     public function orderFindUpdated($start_date, $end_date, $campaign_id = 'all', $group_keys = [], $start_time = '00:00:00', $end_time = "23:59:59")
     {
-        $response = "";
-        if (!empty($start_date) && !empty($end_date)) {
-            $this->fields = [
-                'campaign_id' => $campaign_id,
-                'start_date'  => $start_date,
-                'end_date'    => $end_date,
-                'start_time'  => $start_time,
-                'end_time'    => $end_time,
-            ];
-            if (!empty($group_keys) && is_array($group_keys)) {
-                $this->fields['group_keys'] = implode(',', $group_keys);
+        try {
+           $response = "";
+            if (!empty($start_date) && !empty($end_date)) {
+                $this->fields = [
+                    'campaign_id' => $campaign_id,
+                    'start_date'  => $start_date,
+                    'end_date'    => $end_date,
+                    'start_time'  => $start_time,
+                    'end_time'    => $end_time,
+                ];
+                if (!empty($group_keys) && is_array($group_keys)) {
+                    $this->fields['group_keys'] = implode(',', $group_keys);
+                }
+                $response = $this->__post('order_find_updated');
             }
-            $response = $this->__post('order_find_updated');
+            return $response; 
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
     }
 
     /**
@@ -105,24 +120,29 @@ class Limelight
      */
     public function orderFind($start_date, $end_date, $campaign_id = 'all', $search_type = 'all', $return_type = 'order_view', $criteria = 'all', $start_time = '00:00:00', $end_time = "23:59:59", $product_id = 'all')
     {
-        $response = "";
-        if (!empty($start_date) && !empty($end_date)) {
-            $this->fields = [
-                'campaign_id' => $campaign_id,
-                'start_date'  => $start_date,
-                'end_date'    => $end_date,
-                'start_time'  => $start_time,
-                'end_time'    => $end_time,
-                'search_type' => $search_type,
-                'criteria'    => $criteria,
-                'return_type' => $return_type,
-            ];
-            if (!empty($product_id)) {
-                $this->fields['product_ids'] = $product_id;
+        try {
+            $response = "";
+            if (!empty($start_date) && !empty($end_date)) {
+                $this->fields = [
+                    'campaign_id' => $campaign_id,
+                    'start_date'  => $start_date,
+                    'end_date'    => $end_date,
+                    'start_time'  => $start_time,
+                    'end_time'    => $end_time,
+                    'search_type' => $search_type,
+                    'criteria'    => $criteria,
+                    'return_type' => $return_type,
+                ];
+                if (!empty($product_id)) {
+                    $this->fields['product_ids'] = $product_id;
+                }
+                $response = $this->__post('order_find');
             }
-            $response = $this->__post('order_find');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
+        
     }
 
     /**
@@ -131,14 +151,18 @@ class Limelight
      */
     public function orderReprocess($order_id)
     {
-        $response = "";
-        if (!empty($order_id)) {
-            $this->fields = [
-                'order_id' => $order_id,
-            ];
-            $response = $this->__post('order_reprocess');
+        try {
+            $response = "";
+            if (!empty($order_id)) {
+                $this->fields = [
+                    'order_id' => $order_id,
+                ];
+                $response = $this->__post('order_reprocess');
+            }
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
     }
 
     /**
@@ -149,15 +173,20 @@ class Limelight
 
     public function orderUpdateRecurring($order_id, $status = 'stop')
     {
-        $response = "";
-        if (!empty($order_id)) {
-            $this->fields = [
-                'order_id' => $order_id,
-                'status'   => $status,
-            ];
-            $response = $this->__post('order_update_recurring');
+        try {
+            $response = "";
+            if (!empty($order_id)) {
+                $this->fields = [
+                    'order_id' => $order_id,
+                    'status'   => $status,
+                ];
+                $response = $this->__post('order_update_recurring');
+            }
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
+        
     }
 
     /**
@@ -169,16 +198,20 @@ class Limelight
 
     public function refundOrder($order_id, $amount, $keep_recurring = 1)
     {
-        $response = "";
-        if (!empty($order_id) && !empty($amount)) {
-            $this->fields = [
-                'order_id'       => $order_id,
-                'amount'         => $amount,
-                'keep_recurring' => $keep_recurring,
-            ];
-            $response = $this->__post('order_refund');
+        try {
+            $response = "";
+            if (!empty($order_id) && !empty($amount)) {
+                $this->fields = [
+                    'order_id'       => $order_id,
+                    'amount'         => $amount,
+                    'keep_recurring' => $keep_recurring,
+                ];
+                $response = $this->__post('order_refund');
+            }
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
     }
 
     /**
@@ -188,14 +221,19 @@ class Limelight
 
     public function getProspectDetail($prospect_id)
     {
-        $response = "";
-        if (!empty($prospect_id)) {
-            $this->fields = [
-                'prospect_id' => $prospect_id,
-            ];
+        try {
+            $response = "";
+            if (!empty($prospect_id)) {
+                $this->fields = [
+                    'prospect_id' => $prospect_id,
+                ];
+            }
+            $response = $this->__post('prospect_view');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        $response = $this->__post('prospect_view');
-        return $response;
+        
     }
 
     /**
@@ -204,51 +242,69 @@ class Limelight
      */
     public function getOrderDetail($order_id)
     {
-        $response = "";
-        if (!empty($order_id)) {
-            $this->fields = [
-                'order_id' => is_array($order_id) ? implode(',', $order_id) : $order_id,
-                //'return_format' => 'json',
-            ];
+        try {
+            $response = "";
+            if (!empty($order_id)) {
+                $this->fields = [
+                    'order_id' => is_array($order_id) ? implode(',', $order_id) : $order_id,
+                    //'return_format' => 'json',
+                ];
+            }
+            $response = $this->__post('order_view');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        $response = $this->__post('order_view');
-        return $response;
     }
 
     public function getShippingDetails($campaign_id = 'all', $search_type = 'any', $return_type = 'shipping_method_view')
     {
-        $this->fields = [
-            'campaign_id' => $campaign_id,
-            'search_type' => $search_type,
-            'return_type' => $return_type,
-        ];
-        $response = $this->__post('shipping_method_find');
-        return $response;
+        try {
+            $this->fields = [
+                'campaign_id' => $campaign_id,
+                'search_type' => $search_type,
+                'return_type' => $return_type,
+            ];
+            $response = $this->__post('shipping_method_find');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
+        }
+        
     }
 
     public function getShippingDetailByID($shipping_id)
     {
-        $response = "";
-        if (!empty($shipping_id)) {
-            $this->fields = [
-                'shipping_id' => $shipping_id,
-            ];
+        try {
+            $response = "";
+            if (!empty($shipping_id)) {
+                $this->fields = [
+                    'shipping_id' => $shipping_id,
+                ];
+            }
+            $response = $this->__post('shipping_method_view');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        $response = $this->__post('shipping_method_view');
-        return $response;
     }
 
     public function getGatewayDetailByID($gateway_id)
     {
-        $response = "";
-        if (!empty($response)) {
-            $this->fields = [
-                'gateway_id' => $gateway_id,
-                //'return_format' => 'json',
-            ];
+        try {
+            $response = "";
+            if (!empty($gateway_id)) {
+                $this->fields = [
+                    'gateway_id' => $gateway_id,
+                    //'return_format' => 'json',
+                ];
+            }
+            $response = $this->__post('gateway_view');
+            return $response;
+        } catch (Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        $response = $this->__post('gateway_view');
-        return $response;
+        
     }
 
     public function createNewOrder($order_info = [])
@@ -277,130 +333,130 @@ class Limelight
                 'shippingId'            => $order_info['shippingId'],
                 'billingSameAsShipping' => $order_info['billingSameAsShipping'],
             ];
+        
+
+            if (isset($order_info['shippingAddress2'])) {
+                $this->fields["shippingAddress2"] = $order_info['shippingAddress2'];
+            }
+            if (isset($order_info['AFID'])) {
+                $this->fields["AFID"] = $order_info['AFID'];
+            }
+            if (isset($order_info['SID'])) {
+                $this->fields["SID"] = $order_info['SID'];
+            }
+            if (isset($order_info['AFFID'])) {
+                $this->fields["AFFID"] = $order_info['AFFID'];
+            }
+            if (isset($order_info['C1'])) {
+                $this->fields["C1"] = $order_info['C1'];
+            }
+            if (isset($order_info['C2'])) {
+                $this->fields["C2"] = $order_info['C2'];
+            }
+            if (isset($order_info['C3'])) {
+                $this->fields["C3"] = $order_info['C3'];
+            }
+            if (isset($order_info['AID'])) {
+                $this->fields["AID"] = $order_info['AID'];
+            }
+            if (isset($order_info['OPT'])) {
+                $this->fields["OPT"] = $order_info['OPT'];
+            }
+            if (isset($order_info['click_id'])) {
+                $this->fields["click_id"] = $order_info['click_id'];
+            }
+            if (isset($order_info['dynamic_product_price'])) {
+                $dynamic_product                  = 'dynamic_product_price_' . $order_info['productId'];
+                $this->fields["$dynamic_product"] = $order_info['dynamic_product_price'];
+            }
+            if (isset($order_info['product_qty'])) {
+                $product_qty                  = 'product_qty_' . $order_info['productId'];
+                $this->fields["$product_qty"] = $order_info['product_qty'];
+            }
+            if (isset($order_info['click_id'])) {
+                $this->fields["click_id"] = $order_info['click_id'];
+            }
+            if (isset($order_info['notes'])) {
+                $this->fields["notes"] = $order_info['notes'];
+            }
+            if (isset($order_info['forceGatewayId'])) {
+                $this->fields["forceGatewayId"] = $order_info['forceGatewayId'];
+            }
+            if (isset($order_info['upsellCount']) && !empty($order_info['upsellCount'])) {
+                $this->fields["upsellCount"] = $order_info['upsellCount'];
+            } else {
+                $this->fields["upsellCount"]      = 0;
+                $this->fields["upsellProductIds"] = $order_info['upsellProductIds'];
+            }
+            if (isset($order_info['preserve_force_gateway'])) {
+                $this->fields["preserve_force_gateway"] = $order_info['preserve_force_gateway'];
+            }
+            if (isset($order_info['createdBy'])) {
+                $this->fields["createdBy"] = $order_info['createdBy'];
+            }
+            if (isset($order_info['master_order_id'])) {
+                $this->fields["master_order_id"] = $order_info['master_order_id'];
+            }
+            if (isset($order_info['cascade_enabled'])) {
+                $this->fields["cascade_enabled"] = $order_info['cascade_enabled'];
+            }
+            if (isset($order_info['cascade_override'])) {
+                $this->fields["cascade_override"] = $order_info['cascade_override'];
+            }
+            if (isset($order_info['promoCode'])) {
+                $this->fields["promoCode"] = $order_info['promoCode'];
+            }
+            if (isset($order_info['sessionId'])) {
+                $this->fields["sessionId"] = $order_info['sessionId'];
+            }
+
+            switch ($order_info['creditCardType']) {
+                case 'checking':
+                case 'eft_germany':
+                    $this->fields["checkAccountNumber"] = $order_info['checkAccountNumber'];
+                    $this->fields["checkRoutingNumber"] = $order_info['checkRoutingNumber'];
+                    break;
+                case 'sepa':
+                    $this->fields["sepa_iban"] = $order_info['sepa_iban'];
+                    $this->fields["sepa_bic"]  = $order_info['sepa_bic'];
+                    break;
+                case 'eurodebit':
+                    $this->fields["eurodebit_acct_num"]  = $order_info['eurodebit_acct_num'];
+                    $this->fields["eurodebit_route_num"] = $order_info['eurodebit_route_num'];
+                    break;
+                case 'Paypal':
+                case 'Amazon':
+                    $this->fields["alt_pay_payer_id"] = $order_info['alt_pay_payer_id'];
+                case 'IcePay':
+                    $this->fields["alt_pay_token"] = $order_info['alt_pay_token'];
+                    break;
+
+            }
+
+            if (strtolower($order_info['billingSameAsShipping']) == 'no') {
+                $billingArray = array(
+                    'billingAddress1' => $order_info['billingAddress1'],
+                    'billingCity'     => $order_info['billingCity'],
+                    'billingState'    => $order_info['billingState'],
+                    'billingZip'      => $order_info['billingZip'],
+                    'billingCountry'  => $order_info['billingCountry'],
+                );
+                if (isset($order_info['billingFirstName'])) {
+                    $billingArray["billingFirstName"] = $order_info['billingFirstName'];
+                }
+                if (isset($order_info['billingLastName'])) {
+                    $billingArray["billingLastName"] = $order_info['billingLastName'];
+                }
+                if (isset($order_info['billingAddress2'])) {
+                    $billingArray["billingAddress2"] = $order_info['billingAddress2'];
+                }
+                $this->fields = array_merge($this->fields, $billingArray);
+            }
+            $response = $this->__post('NewOrder');
+            return $response;
         } catch (\Exception $e) {
-            return $e->getMessage();
-            //return array("message" => $e->getMessage(), "response_code" => 0);s
+            throw new \Exception($e->getMessage(), 1);
         }
-
-        if (isset($order_info['shippingAddress2'])) {
-            $this->fields["shippingAddress2"] = $order_info['shippingAddress2'];
-        }
-        if (isset($order_info['AFID'])) {
-            $this->fields["AFID"] = $order_info['AFID'];
-        }
-        if (isset($order_info['SID'])) {
-            $this->fields["SID"] = $order_info['SID'];
-        }
-        if (isset($order_info['AFFID'])) {
-            $this->fields["AFFID"] = $order_info['AFFID'];
-        }
-        if (isset($order_info['C1'])) {
-            $this->fields["C1"] = $order_info['C1'];
-        }
-        if (isset($order_info['C2'])) {
-            $this->fields["C2"] = $order_info['C2'];
-        }
-        if (isset($order_info['C3'])) {
-            $this->fields["C3"] = $order_info['C3'];
-        }
-        if (isset($order_info['AID'])) {
-            $this->fields["AID"] = $order_info['AID'];
-        }
-        if (isset($order_info['OPT'])) {
-            $this->fields["OPT"] = $order_info['OPT'];
-        }
-        if (isset($order_info['click_id'])) {
-            $this->fields["click_id"] = $order_info['click_id'];
-        }
-        if (isset($order_info['dynamic_product_price'])) {
-            $dynamic_product                  = 'dynamic_product_price_' . $order_info['productId'];
-            $this->fields["$dynamic_product"] = $order_info['dynamic_product_price'];
-        }
-        if (isset($order_info['product_qty'])) {
-            $product_qty                  = 'product_qty_' . $order_info['productId'];
-            $this->fields["$product_qty"] = $order_info['product_qty'];
-        }
-        if (isset($order_info['click_id'])) {
-            $this->fields["click_id"] = $order_info['click_id'];
-        }
-        if (isset($order_info['notes'])) {
-            $this->fields["notes"] = $order_info['notes'];
-        }
-        if (isset($order_info['forceGatewayId'])) {
-            $this->fields["forceGatewayId"] = $order_info['forceGatewayId'];
-        }
-        if (isset($order_info['upsellCount']) && !empty($order_info['upsellCount'])) {
-            $this->fields["upsellCount"] = $order_info['upsellCount'];
-        } else {
-            $this->fields["upsellCount"]      = 0;
-            $this->fields["upsellProductIds"] = $order_info['upsellProductIds'];
-        }
-        if (isset($order_info['preserve_force_gateway'])) {
-            $this->fields["preserve_force_gateway"] = $order_info['preserve_force_gateway'];
-        }
-        if (isset($order_info['createdBy'])) {
-            $this->fields["createdBy"] = $order_info['createdBy'];
-        }
-        if (isset($order_info['master_order_id'])) {
-            $this->fields["master_order_id"] = $order_info['master_order_id'];
-        }
-        if (isset($order_info['cascade_enabled'])) {
-            $this->fields["cascade_enabled"] = $order_info['cascade_enabled'];
-        }
-        if (isset($order_info['cascade_override'])) {
-            $this->fields["cascade_override"] = $order_info['cascade_override'];
-        }
-        if (isset($order_info['promoCode'])) {
-            $this->fields["promoCode"] = $order_info['promoCode'];
-        }
-        if (isset($order_info['sessionId'])) {
-            $this->fields["sessionId"] = $order_info['sessionId'];
-        }
-
-        switch ($order_info['creditCardType']) {
-            case 'checking':
-            case 'eft_germany':
-                $this->fields["checkAccountNumber"] = $order_info['checkAccountNumber'];
-                $this->fields["checkRoutingNumber"] = $order_info['checkRoutingNumber'];
-                break;
-            case 'sepa':
-                $this->fields["sepa_iban"] = $order_info['sepa_iban'];
-                $this->fields["sepa_bic"]  = $order_info['sepa_bic'];
-                break;
-            case 'eurodebit':
-                $this->fields["eurodebit_acct_num"]  = $order_info['eurodebit_acct_num'];
-                $this->fields["eurodebit_route_num"] = $order_info['eurodebit_route_num'];
-                break;
-            case 'Paypal':
-            case 'Amazon':
-                $this->fields["alt_pay_payer_id"] = $order_info['alt_pay_payer_id'];
-            case 'IcePay':
-                $this->fields["alt_pay_token"] = $order_info['alt_pay_token'];
-                break;
-
-        }
-
-        if (strtolower($order_info['billingSameAsShipping']) == 'no') {
-            $billingArray = array(
-                'billingAddress1' => $order_info['billingAddress1'],
-                'billingCity'     => $order_info['billingCity'],
-                'billingState'    => $order_info['billingState'],
-                'billingZip'      => $order_info['billingZip'],
-                'billingCountry'  => $order_info['billingCountry'],
-            );
-            if (isset($order_info['billingFirstName'])) {
-                $billingArray["billingFirstName"] = $order_info['billingFirstName'];
-            }
-            if (isset($order_info['billingLastName'])) {
-                $billingArray["billingLastName"] = $order_info['billingLastName'];
-            }
-            if (isset($order_info['billingAddress2'])) {
-                $billingArray["billingAddress2"] = $order_info['billingAddress2'];
-            }
-            $this->fields = array_merge($this->fields, $billingArray);
-        }
-        $response = $this->__post('NewOrder');
-        return $response;
     }
 
     public function createNewOrderCardOnFile($order_info)
@@ -416,14 +472,18 @@ class Limelight
 
     public function orderVoid($order_id)
     {
-        $response = "";
-        if (!empty($order_id)) {
-            $this->fields = [
-                'order_ids' => $order_id,
-            ];
-            $response = $this->__post('order_void');
+        try {
+            $response = "";
+            if (!empty($order_id)) {
+                $this->fields = [
+                    'order_ids' => $order_id,
+                ];
+                $response = $this->__post('order_void');
+            }
+            return $response;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(), 9999);
         }
-        return $response;
     }
 
     private function __post($method)

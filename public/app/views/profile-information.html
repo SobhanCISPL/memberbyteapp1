@@ -1,0 +1,53 @@
+<div layout="column" class="white-back" md-whiteframe="3" layout-padding layout-margin>
+	<div layout="row" class="padding-0 margin-0" layout-align="end center">
+		<md-menu>
+			<md-button class="md-icon-button padding-0" aria-label="Settings" ng-mouseenter="$mdMenu.open()">
+				<i class="material-icons">&#xE5D4;</i>
+			</md-button>
+			<md-menu-content width="4" ng-mouseleave="$mdMenu.close()">
+				<md-menu-item ng-repeat="item in [1, 2, 3]">
+					<md-button>
+						Option {{item}}
+					</md-button>
+				</md-menu-item>
+			</md-menu-content>
+		</md-menu>
+	</div>
+
+	<div layout = "row" layout-align="center center" style="margin-top: -25px;">
+		<div flex="50" layout="column" class="dashed-gray-right-border">
+			<div layout="row" class="padding-0" layout-align="center center">
+				<img ng-src="{{(user.profile_image) ? user.profile_image : 'images/default_user.png'}}" class="user-avatar-big" alt="" />
+			</div>
+			<md-list>
+				<md-list-item class="md-2-line">
+					<div class="md-list-item-text text-center" style="">
+						<span class="md-title"> {{user.name}} </span>
+						<p><span class="md-list-item-text"> {{user.email}} </span></p>
+					</div>
+				</md-list-item>
+			</md-list>
+		</div>
+		<div flex="50" layout="row" layout-align="center center">
+			<form name="profileForm" ng-submit="SubmitForm()" novalidate>
+				<div layout="row">
+					<md-input-container class="md-block">
+						<label>Name</label>
+						<input required name="name" ng-model="user.name" type="text">
+					</md-input-container>
+				</div>
+				<div layout="row">
+					<md-input-container class="md-block">
+						<label>Email</label>
+						<input required ng-model="user.email" type="email" name="email">
+					</md-input-container>
+				</div>
+				<div layout="row" layout-align="center center">
+					<label for=""></label>
+					<md-button type="button" class="margin-left-0 padding-0" ng-click="resetUser()">Reset</md-button>
+					<md-button type="submit" class="margin-left-0 padding-0 md-primary" ng-disabled="profileForm.$invalid">Save</md-button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

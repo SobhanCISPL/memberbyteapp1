@@ -1,5 +1,5 @@
 angular.module('memberByteLoginApp', [
-	'ngSanitize','ngMaterial', 'oitozero.ngSweetAlert', 'angular-loading-bar'
+	'ngMaterial', 'ngSanitize'
 	])
 .config(function ($mdThemingProvider) {
 	$mdThemingProvider
@@ -11,45 +11,46 @@ angular.module('memberByteLoginApp', [
 		'default': '800'
 	});
 })
+.factory('Toast', function ($mdToast) {
+	return {
+		showToast: function (text) {
+			return $mdToast.show(
+				$mdToast.simple()
+				.textContent(text)
+				.position('bottom right')
+				.hideDelay(3000)
+				);
+		}
+	};
+})
 
-.config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
-	cfpLoadingBarProvider.includeSpinner = true;
-	cfpLoadingBarProvider.includeBar = true;
-}])
+.controller('LoginIndexCtrl', function ($scope, $mdDialog, $http, $mdToast, Toast) {
 
+	if(ERROR !== '' && ERROR.success === false && ERROR.error_message != ''){
+		Toast.showToast(ERROR.error_message);
+	}
 
-.controller('LoginIndexCtrl', function ($scope, $mdDialog, $http, $mdToast, SweetAlert) {
-var email_id={};
+	$scope.thirdPartyLogin = function(login_driver){
+		$http.post('login', {type:login_driver})
+		.then(function (response) {
+			if(response.data.success === false){
+				Toast.showToast(response.data.error_message);
+				return false;
+			}
+			location.href = response.data.authUrl;
+		});
+	}
 				// Google login
 				$scope.loginWithGoogle = function () {
-					$http.post('login', {type:"google"})
-					.then(function (response) {
-						// console.log(response);
-						if(response.data.success === false){
-							console.log(response.data.error_message);
-							// Toast.showToast('Something went wrong');
-							return false;
-						}
-						location.href = response.data.authUrl;
-					});
+					$scope.thirdPartyLogin("google");
 				}
-
-				// Facebook login by sobhan 27-12-17
+				// Facebook login  by sobhan
 				$scope.loginWithFacebook = function () {
-					$http.post('login', {type:"facebook"}).then(function(response){
-						console.log(response);
-						if(response.data.success === false){
-							console.log(response.data.error_message);
-							return false;
-						}
-						location.href = response.data.authUrl;
-
-					});
+					$scope.thirdPartyLogin("facebook");
 				}
 
-				// Basic login with OTP, EMAIL, CHANGE PW
+				// Basic login with OTP, EMAIL, CHANGE PW by sobhan
 				$scope.loginWithPassword = function () {
-					console.log('basic');
 					$scope.showDialog = function($event) {
 						var parentEl = angular.element(document.body);
 						$mdDialog.show({
@@ -63,22 +64,21 @@ var email_id={};
 							},
 							controller: DialogController
 						});
-						function DialogController($scope, $mdDialog, $location, $mdToast, $http, SweetAlert) {
-							$scope.send_otp = function () {
+						function DialogController($scope, $mdDialog, $location, $mdToast, $http, Toast) {
 
+							$scope.send_otp = function (ev) {
 								if(!$scope.username){
+									Toast.showToast("Usename can't be left blank!");
+									
+									$scope.loader = false; // loader hide
+									$scope.dialog = false; 
 
-									$mdToast.show(
-								      $mdToast.simple()
-								        .textContent("Usename can't be left blank!")
-								        .position("bottom right ")
-								        .hideDelay(3000)
-								    );
 									return false;
 								}else{
 									$scope.isDisabled = true;
 
-									// $cfpLoadingBarProvider.includeSpinner = true;
+									$scope.loader = true; // loader hide
+									$scope.dialog = true; 
 
 									$http.post('/check_user', {
 										data:$scope.username
@@ -90,32 +90,45 @@ var email_id={};
 												title: 'OTP Varification',	
 												parent: parentEl,
 												targetEvent: $event,
-												templateUrl: 'app/views/otp_varification.html',
+												templateUrl: 'app/views/otp-varification.html',
 												locals: {
 													otp: $scope.otp,
 												},
 												controller: DialogController
 											});
 										}
+
+										if(response.data.param == 400) {
+											var confirm = $mdDialog.confirm()
+										          .title('Sorry!')
+										          .textContent(response.data.error_message)
+										          .ariaLabel('Lucky day')
+										          .targetEvent(ev)
+										          .ok('Okay');
+
+										    $mdDialog.show(confirm).then(function() {
+										    	$scope.isDisabled = false; 
+										      	location.reload();
+										    });
+										}
 									});
 								}								
 							}
 
-							$scope.send_otp_varify = function (){
+							$scope.send_otp_varify = function (ev){
 								if(!$scope.otp){
-									$mdToast.show(
-						      		$mdToast.simple()
-								        .textContent("OTP field can't be left blank!")
-								        .position("bottom right ")
-								        .hideDelay(3000)
-								    );
+									Toast.showToast("OTP field can't be left blank!");
 									return false;
 								}else{
 									$scope.isDisabled = true;
 
+									$scope.loader = true; // loader hide
+									$scope.dialog = true;
+
 									$http.post('/check_otp', {
 										data:$scope.otp
 									}).then(function(response){
+
 										if(response.data.param == "100"){
 											$scope.isDisabled = false;
 
@@ -125,7 +138,7 @@ var email_id={};
 												title: 'Generate Password',	
 												parent: parentEl,
 												targetEvent: $event,
-												templateUrl: 'app/views/set_password.html',
+												templateUrl: 'app/views/set-password.html',
 												locals: {
 													new_password: $scope.new_password,
 													confirm_password: $scope.confirm_password
@@ -135,22 +148,21 @@ var email_id={};
 										}
 
 										if(response.data.param == 404){
-											alert ("Please provide valid OTP");
+											Toast.showToast("Please provide valid OTP");
 											$scope.isDisabled = false;
+
+											$scope.loader = false; // loader hide
+ 											$scope.dialog = false; 
+
 											return false;
 										}
 									});
 								}
 							}
 
-							$scope.change_pw = function () {
+							$scope.change_pw = function (ev) {
 								if(!$scope.new_password && !$scope.confirm_password){
-									$mdToast.show(
-						      		$mdToast.simple()
-								        .textContent("Password & Confirm can't be left blank!")
-								        .position("bottom right ")
-								        .hideDelay(3000)
-								    );
+									Toast.showToast("Password & Confirm can't be left blank!");
 									return false;
 								}else{
 									var pw = $scope.new_password;
@@ -158,15 +170,13 @@ var email_id={};
 									var user_email_id = email_id;
 
 									if(pw  != confirm_pw){
-										$mdToast.show(
-							      		$mdToast.simple()
-									        .textContent("Password & Confirm Password should be same!")
-									        .position("bottom right ")
-									        .hideDelay(3000)
-									    );
+										Toast.showToast("Password & Confirm Password should be same!");
 										return false;
 									}else{
 										$scope.isDisabled = true;
+										$scope.loader = true; // loader hide
+										$scope.dialog = true; 
+
 
 										$http.post('/change_password',{
 											data:{
@@ -174,47 +184,49 @@ var email_id={};
 												"user_email_id": user_email_id
 											}
 										}).then(function(response){
-											console.log(response);
 											if(response.data.param == 100){
-												SweetAlert.swal({   
-													title: "Thank You",   
-													text: response.data.message,   
-													type: "success",     
-													confirmButtonColor: "#DD6B55",   
-													confirmButtonText: "OK"
-												},  function(){ 
-													$scope.isDisabled = false; 
-													window.location.reload();
-													
-												});
+												
+												var confirm = $mdDialog.confirm()
+											          .title('Confirmation!')
+											          .textContent(response.data.message)
+											          .ariaLabel('Lucky day')
+											          .targetEvent(ev)
+											          .ok('Okay');
+
+											    $mdDialog.show(confirm).then(function() {
+											    	$scope.isDisabled = false; 
+											      	location.reload();
+											    });
 											}
 
 											if(response.data.param == 200){
-												SweetAlert.swal({   
-													title: "Thank You",   
-													text: response.data.message,   
-													type: "success",     
-													confirmButtonColor: "#DD6B55",   
-													confirmButtonText: "OK"
-												},  function(){ 
-													$scope.isDisabled = false; 
-													window.location.reload();
-													
-												});
+
+												var confirm = $mdDialog.confirm()
+											          .title('Confirmation!')
+											          .textContent(response.data.message)
+											          .ariaLabel('Lucky day')
+											          .targetEvent(ev)
+											          .ok('Okay');
+
+											    $mdDialog.show(confirm).then(function() {
+											    	$scope.isDisabled = false; 
+											      	location.reload();
+											    });
 											}
 
 											if(response.data.param == 333){
-												SweetAlert.swal({   
-													title: "Thank You",   
-													text: response.data.error_message,   
-													type: "warning",     
-													confirmButtonColor: "#DD6B55",   
-													confirmButtonText: "OK"
-												},  function(){ 
-													$scope.isDisabled = false; 
-													window.location.reload();
-													
-												});
+
+												var confirm = $mdDialog.confirm()
+											          .title('Sorry!')
+											          .textContent(response.data.error_message)
+											          .ariaLabel('Lucky day')
+											          .targetEvent(ev)
+											          .ok('Okay');
+
+											    $mdDialog.show(confirm).then(function() {
+											    	$scope.isDisabled = false; 
+											      	location.reload();
+											    });
 											}
 										});
 									}
@@ -223,7 +235,9 @@ var email_id={};
 
 							//Basic Login Authenticate
 
-							$scope.loginFormSubmit = function (){
+							$scope.loginFormSubmit = function (ev){
+								$scope.loader = true; // loader hide
+								$scope.dialog = true; 
 
 								$http.post('/basic-login', {
 									data:{
@@ -232,24 +246,20 @@ var email_id={};
 									}
 								}).then(function(response){
 
-									if(response.data.success == 'True'){
+									if(response.data.success == true){
 										var url = response.data.url;
 
 										location.href = url;
 									}
 
-									if(response.data.success == 'False'){
-										SweetAlert.swal({   
-											title: "Oh!",   
-											text: response.data.error_message,   
-											type: "warning",     
-											confirmButtonColor: "#DD6B55",   
-											confirmButtonText: "OK"
-										},  function(){ 
-											$scope.isDisabled = false; 
-											// window.location.reload();
-											
-										});
+									if(response.data.param == 404){
+										Toast.showToast(response.data.error_message);
+										$scope.isDisabled = false;
+
+										$scope.loader = false; // loader hide
+										$scope.dialog = false; 
+
+										return false;
 									}
 								});
 							}
@@ -261,4 +271,5 @@ var email_id={};
 					}
 					$scope.showDialog();
 				};
+
 			});

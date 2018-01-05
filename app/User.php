@@ -12,17 +12,13 @@ class User
     protected $table = 'users';
     protected $userOtpTable = "user_otp";
 
-    public function __construct(){
-
-    }
-
-    public function createUser($userDetail){
+    public function createLogin($userDetail){
         try{
             $result = false;
             $values = [];
             $query = DB::table($this->table);
             $condition = ['email' => $userDetail['email']];
-            $user = $this->getUser($condition);
+            $user = json_decode(json_encode($this->getUser($condition)), 1);
             if(count($user) === 0 ){
                 $values = [
                     'name' => !empty($userDetail['name']) ? $userDetail['name'] : null,
@@ -35,6 +31,10 @@ class User
                 $result = $this->insertUser($query, $values);
             }
             elseif(count($user) > 0){
+                if($user[0]['login_type'] !== $userDetail['login_type']){
+                    throw new Exception('Email Id already exists');
+                    // return false;
+                }
                 $user = json_decode(json_encode($user),1);
                 $values = [
                     'last_loggedin_at' => CURR_DATE_TIME_EST
@@ -49,7 +49,7 @@ class User
         }
     }
 
-    public function getUser($condition = [], $select = []){
+     public function getUser($condition = [], $select = [] ){
         $query = DB::table($this->table);
         if(!empty($condition)){
             foreach($condition as $key => $value){
@@ -57,10 +57,8 @@ class User
             }
         }
         if(!empty($select)){
-            $query->select(implode(',', $select));
+            $query->select($select);
         }
-        // print_r($query->get()->toArray());
-        // die();
         return $query->get()->toArray();
     }
 
@@ -103,30 +101,21 @@ class User
         $values = [];
         $query = DB::table($this->userOtpTable);
         $condition = ['email_id' => $email ];
-        $user = $this->getUser1($condition);
+        $user = $this->checkUserInOtpTable($condition);
 
+        //check user with user table
+        $condition1 = ['email' => $email ];
+        $user1 = $this->getUser($condition1);
+
+        // print_r($user1);
+        // die();
+        //end
+        
         $rand = rand(1999,9999);
 
-        if(count($user) === 0){
-            $data = array('otp'=>$rand);
-            Mail::send('otp', $data, function($message) use ($email) {
-                $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
+        if(count($user) === 0 ){
 
-                $message->to($email)->subject('Login OTP!');           
-            });
-
-            $values = [
-                'email_id' => $email,
-                'otp' => $rand,
-                'created_at' => CURR_DATE_TIME_EST
-            ];
-            $result = $this->insertUser($query, $values);
-
-            return 1;
-        }elseif(count($user) > 0){
-
-            if (time() - strtotime($user[0]->created_at) > 60*60*24) {
-
+            if (count($user1) === 0) {
                 $data = array('otp'=>$rand);
                 Mail::send('otp', $data, function($message) use ($email) {
                     $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
@@ -134,26 +123,111 @@ class User
                     $message->to($email)->subject('Login OTP!');           
                 });
 
-                $user = json_decode(json_encode($user),1);
                 $values = [
+                    'email_id' => $email,
                     'otp' => $rand,
                     'created_at' => CURR_DATE_TIME_EST
                 ];
-                $condition = ['id' => $user[0]['id']];
-                $result = $this->updateUserForOtpTable($query, $condition, $values);
+                $result = $this->insertUser($query, $values);
 
-                if($result){
-                    return 3;
+                return 1;
+            }elseif(count($user1) > 0){
+                if($user1[0]->login_type == 3){
+                    $data = array('otp'=>$rand);
+                    Mail::send('otp', $data, function($message) use ($email) {
+                        $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
+
+                        $message->to($email)->subject('Login OTP!');           
+                    });
+
+                    $values = [
+                        'email_id' => $email,
+                        'otp' => $rand,
+                        'created_at' => CURR_DATE_TIME_EST
+                    ];
+                    $result = $this->insertUser($query, $values);
+
+                    return 1;
+                }else{
+                    return "Exist";
                 }
+            }
+
+            
+        }elseif(count($user) > 0){
+
+            if (time() - strtotime($user[0]->created_at) > 60*60*24) {
+
+                if (count($user1) === 0) {
+
+                    $data = array('otp'=>$rand);
+                    Mail::send('otp', $data, function($message) use ($email) {
+                        $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
+
+                        $message->to($email)->subject('Login OTP!');           
+                    });
+
+                    $user = json_decode(json_encode($user),1);
+                    $values = [
+                        'otp' => $rand,
+                        'created_at' => CURR_DATE_TIME_EST
+                    ];
+                    $condition = ['id' => $user[0]['id']];
+                    $result = $this->updateUserForOtpTable($query, $condition, $values);
+
+                    if($result){
+                        return 3;
+                    }
+                }elseif (count($user1) > 0) {
+                    if($user1[0]->login_type == 3){
+                        $data = array('otp'=>$rand);
+                        Mail::send('otp', $data, function($message) use ($email) {
+                            $message->from('sobhan.das@documentscanner.in','Code Clouds Developer');
+
+                            $message->to($email)->subject('Login OTP!');           
+                        });
+
+                        $user = json_decode(json_encode($user),1);
+                        $values = [
+                            'otp' => $rand,
+                            'created_at' => CURR_DATE_TIME_EST
+                        ];
+                        $condition = ['id' => $user[0]['id']];
+                        $result = $this->updateUserForOtpTable($query, $condition, $values);
+
+                        if($result){
+                            return 3;
+                        }
+                    }else{
+                        return "Exist";
+                    }
+                }
+                
 
             } else {
                 //less than 24 hours
-               return 2;
+
+                if(count($user1) === 0){
+                    return 2;
+                }elseif (count($user1) > 0) {
+                    if($user1[0]->login_type == 3){
+                        return 2;
+                    }else{
+                        return "Exist";
+                    }
+                }
+               
             }
         }
     }
 
-    public function getUser1($condition = [], $select = []){
+    /**
+    * get user opt row(s)
+    *
+    * @param $condition -> array, $select -> array
+    * @return array
+    */
+    public function checkUserInOtpTable($condition = [], $select = []){
         $query = DB::table($this->userOtpTable);
         if(!empty($condition)){
             foreach($condition as $key => $value){
@@ -171,15 +245,8 @@ class User
         $values = [];
         $query = DB::table($this->userOtpTable);
         $condition = ['otp' => $otp ];
-        $user_otp_matched = $this->getUser1($condition);
-
-        if(count($user_otp_matched) === 0){
-            return 0;
-            exit;
-        }elseif(count($user_otp_matched) > 0){
-            return $user_otp_matched;
-            exit;
-        }
+        $user_otp_matched = $this->checkUserInOtpTable($condition);
+        return $user_otp_matched;
     }
 
     public function basicLoginUserChecking ($password,$email_id,$first_name='',$last_name='') {

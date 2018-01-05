@@ -34,11 +34,15 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
-
     'facebook' => [
         'client_id' => '159875864623260',
         'client_secret' => '98ac2a675db3e8d756063aa0162edc66',
         'redirect' => 'http://memberbyteapp.localhost.com/',
+    ],
+    'google' => [
+        'client_id'     => '18158992706-lj2bpjmc1s6jj0v6r7fma4ka3b3t7adt.apps.googleusercontent.com',
+        'client_secret' => 'ET_frq0q1sme5pelfSNk_3Xq',
+        'redirect'      => 'http://memberbyteapp.localhost.com',
     ],
 
 ];

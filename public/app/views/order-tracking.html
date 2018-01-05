@@ -1,0 +1,62 @@
+<div class="white-back" layout="row" md-whiteframe="3" layout-margin layout-align="center center">
+	<md-input-container layout="row" layout-align="center center" md-no-float class="md-block search_bar" flex>
+		<input flex="90" ng-model="tracking_id" placeholder="Enter tracking id" ng-change = "input()">
+		<i ng-click="track(tracking_id); cler_btn = true" flex="10" class="material-icons" style="margin-top:4px;">&#xE315;</i>
+	</md-input-container>
+</div>
+
+<div layout="column" md-whiteframe="3" layout-margin layout-align="center center" flex ng-show="loader_circle" class="white-back loading-text-div">
+	<md-progress-circular md-mode="indeterminate"  md-diameter="100"></md-progress-circular>
+	<span>Loading orders...</span>
+</div>
+
+<div layout="column" md-whiteframe="3" layout-margin layout-align="center center" flex ng-show="default_preview" class="white-back loading-text-div">
+	<span>Track your order</span>
+</div>
+
+<div layout="column" md-whiteframe="3" layout-margin class="white-back" ng-hide="loaded_content">
+	<div layout="row">
+		<div flex="70" class="dashed-gray-right-border" layout-padding style="">
+			<div layout = "row" layout-padding layout-align="center center" class="text-center">
+				<div flex><b>Item</b></div>
+				<div flex><b>Price</b></div>
+				<div flex><b>Qty</b></div>
+				<div flex><b>Total</b></div>
+			</div>
+			<md-divider  class="padding-0 yellow-divider"></md-divider>
+			<div layout = "row" layout-padding layout-align="center center" class="text-center gray-font">
+				<div flex>product name</div>
+				<div flex>$120</div>
+				<div flex>1</div>
+				<div flex>$120</div>
+			</div>
+			<!-- <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider> -->
+		</div>
+		<div flex="30" layout-padding layout-align="center center" class="text-center">
+			<i class="material-icons">&#xE558;</i>
+			<span class="yellow-title-font">Tracking ID</span>
+			<p class="margin-0 gray-font padding-0">{{tracking_id}}</p>
+
+			<i class="material-icons">&#xE8F6;</i>
+			<span class="yellow-title-font">Shipping via</span>
+			<p class="margin-0 gray-font padding-0">UPS</p>
+		</div>
+	</div>
+
+	<md-divider></md-divider>
+	
+	<div layout-padding>
+		<div layout = "row" layout-padding layout-align="center center" class="text-center">
+			<div flex><b>Date & Time</b></div>
+			<div flex><b>Status of Item</b></div>
+			<div flex><b>Location</b></div>
+		</div>
+		<md-divider class="padding-0 yellow-divider"></md-divider>
+		<div layout = "row" layout-padding layout-align="center center" class="text-center gray-font">
+			<div flex>November 22, 2017, 12:00 pm</div>
+			<div flex>Out for Delivery</div>
+			<div flex>Orlando, FL, 32822</div>
+		</div>
+		<!-- <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider> -->
+	</div>
+</div>

@@ -2,212 +2,145 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Response;
-use Google_Client;
-use Google_Service_Plus;
-use URL;
-use Exception;
 use App\User;
+use Exception;
+use Response;
+use Session;
+use URL;
+use App\SocialLogin\SocialLogin;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOTP;
 use App\Http\Controllers\OrderController;
-// use App\SocialLogin\Facebook;
-// use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
-    protected $redirect_url, $dashboard_url, $google_client_id, $google_client_secret, $google_client, $plus;
+    protected $redirect_url, $dashboard_url, $google, $facebook, $driver;
 
-    public function __construct(){
-        $this->user_model = new User();
+    public function __construct()
+    {
 
-        $this->redirect_url = URL::to('/');
+        $this->user_model    = new User();
+        $this->redirect_url  = URL::to('/');
         $this->dashboard_url = URL::to('/') . '/app';
+        $this->SocialLogin = new SocialLogin();
 
-        //google client create
-        $this->google_client_id = "18158992706-lj2bpjmc1s6jj0v6r7fma4ka3b3t7adt.apps.googleusercontent.com";
-        $this->google_client_secret = "ET_frq0q1sme5pelfSNk_3Xq";
-        $this->googleClientCreate();
-
-
-        // $this->fb_client_id = "159875864623260";
-        // $this->fb_client_secret = "98ac2a675db3e8d756063aa0162edc66";
-    }
-
-    /**
-     * Create google client for user google login.
-     *
-     * @param  
-     * @return true/false
-     */
-    private function googleClientCreate(){
-        $this->google_client = new Google_Client();
-        $this->google_client->setClientId($this->google_client_id);
-        $this->google_client->setClientSecret($this->google_client_secret);
-        $this->google_client->setRedirectUri($this->redirect_url);
-        $this->google_client->setScopes('email');
-        $this->plus = new Google_Service_Plus($this->google_client);
-        $guzzleClient = new \GuzzleHttp\Client(array('curl' => array(CURLOPT_SSL_VERIFYPEER => false,),));
-        $this->google_client->setHttpClient($guzzleClient);
-        return true;
     }
 
     /**
      * Show login page / after login redirection to dashboard.
      *
-     * @param  
+     * @param
      * @return view
      */
 
-    public function index(Request $request){
-        try{
-            if(
-                $request->session()->has('loginFlag') && 
-                $request->session()->get('loginFlag') === 'logged_in'){
-                return redirect($this->dashboard_url);
-            }
-            if ($request->has('code')) { // google login
-                $userDetail = [];
-                $access_token = $this->googleAuthenticateAccesstoken($request->input('code'));
-                $userDetail = $this->googleSetAccessToken($access_token);
+    public function index(Request $request)
+    {
+        $userDetail = [];
+        try {
+            if (
+                $request->session()->has('loginFlag') &&
+                $request->session()->get('loginFlag') === 'logged_in'
+            ) {
+                $user  = json_decode( json_encode( $this->user_model->getUser(
+                    ['email' => $request->session()->get('userid')],
+                    ['login_type']
+                )), 1);
 
-                if(empty($userDetail)){
-                    throw new Exception('Something went wrong');
-                }
-                $user = $this->user_model->createUser($userDetail);
-                if($user){
-                    $request->session()->put('loginFlag', 'logged_in');
+                if($user[0]['login_type'] === $request->session()->get('login_type')){
                     return redirect($this->dashboard_url);
                 }
             }
+            if ($request->has('code')) {
+                $this->driver = $request->session()->get('loginDriver');
+                $detail = $this->SocialLogin->getUser($this->driver);
+                $userDetail = $this->filterUserDetail($detail, $this->driver);
 
+                if (empty($userDetail)) {
+                    throw new Exception('Something went wrong');
+                }
+                $user = $this->user_model->createLogin($userDetail);
+                if ($user) {
+                    $request->session()->flush();
+                    $request->session()->regenerate();
+                    $request->session()->put('loginFlag', 'logged_in');
+                    $request->session()->put('userid', $userDetail['email']);
+                    $request->session()->put('login_type', $userDetail['login_type']);
+                    return redirect($this->dashboard_url);
+                }
+            }
             return view('index');
-        }
-        catch(Exception $ex){
-            return Response::json(['success' => false, 'error_message' => $ex->getMessage()]);
+        } catch (Exception $ex) {
+            $data = ['success' => false, 'error_message' => $ex->getMessage()];
+            return view('index', ['data' => $data]);
+            return Response::json(['success' => false, 'error_message' => $ex->getMessage(), 'redirect_url' => $this->redirect_url]);
         }
     }
 
     /**
      * Login method
      *
-     * @param  
+     * @param
      * @return login auth url for google/facebook login
      */
 
-    public function login(Request $request){
-
-        try{
-            $method = $request->input('type');
-            // $social = new social;
-            // $authUrl = $social->$method();
-            $authUrl = $this->$method();
+    public function login(Request $request)
+    {
+        try {
+            $this->driver = $request->input('type');
+            $request->session()->put('loginDriver', $this->driver);
+            $authUrl = $this->SocialLogin->authUrl($this->driver);
             return Response::json(['success' => true, 'authUrl' => $authUrl]);
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
             return Response::json(['success' => false, 'error_message' => $ex->getMessage()]);
         }
     }
 
-    /**
-     * Google login page url create
+     /**
+     * User details filter to save to the db
      *
-     * @param 
-     * @return 
+     * @param $detail -> user detail full array
+     * @return []
      */
 
-    private function facebook(){
-        try{
+    public function filterUserDetail($detail, $driver){
+        $userDetail = [
+            'id'                => '',
+            'name'              => '',
+            'email'             => '',
+            'userType'          => '',
+            'profile_image_url' => '',
+        ];
+        $userDetail['id']                = $detail->getId();
+        $userDetail['name']              = $detail->getName();
+        $userDetail['email']             = $detail->getEmail();
+        $userDetail['profile_image_url'] = $this->SocialLogin->getBigAvatar($detail, $driver);
 
-            $fb_url = new Facebook();
-            $url = $fb_url->redirect();
-            return $url;
+        switch ($this->driver) {
+            case 'google':
+            $userDetail['login_type'] = 1;
+            break;
+            case 'facebook':
+            $userDetail['login_type'] = 2;
+            break;
+            case 'basic':
+            $userDetail['login_type'] = 3;
+            break;
         }
-        catch (Exception $ex)
-        {
-            throw new Exception($ex->getMessage());
-        }
-    }
-
-    /**
-     * Google login page url create
-     *
-     * @param 
-     * @return 
-     */
-
-    private function google(){
-        try{
-            return $this->google_client->createAuthUrl();
-        }
-        catch (Exception $ex)
-        {
-            throw new Exception($ex->getMessage());
-        }
-    }
-
-    /**
-     * 
-     *
-     * @param 
-     * @return
-     */
-    private function googleAuthenticateAccesstoken($code = null)
-    {
-        try{
-            $access_token_array = [];
-            $this->google_client->authenticate($code);
-            $access_token_array = $this->google_client->getAccessToken();
-            return $access_token_array['access_token'];
-        }
-        catch(Exception $ex){
-            throw new Exception($ex->getMessage());
-        }
-    }
-
-    /**
-     * 
-     *
-     * @param 
-     * @return
-     */
-    private function googleSetAccessToken($accesstoken = null)
-    {
-        try{
-            $userDetail = [
-                'id' => '',
-                'name' => '',
-                'email' => '',
-                'domainName' => '',
-                'userType' => '',
-                'profile_image_url' => '',
-                'login_type' => 1  //for google user 1 , for facebook user 2 , else 3
-            ];
-            $this->google_client->setAccessToken($accesstoken);
-            $me = $this->plus->people->get('me');
-            $userDetail['email']  = $me['emails'][0]['value'];
-            $emailFragments = explode('@', $userDetail['email']);
-            $userDetail['domainName'] = array_pop($emailFragments);
-            $userDetail['id'] = $me['id'];
-            $userDetail['name'] = $me['displayName'];
-            $userDetail['profile_image_url'] = $me['image']['url'];
-            return $userDetail;
-        }
-        catch(Exception $ex){
-            throw new Exception($ex->getMessage());
-        }
+        return $userDetail;
     }
 
     /**
      * Logout
      *
-     * @param 
-     * @return url
+     * @param
+     * @return json
      */
-    public function logout(Request $request){
-        $request->session()->forget('loginFlag');
+    public function logout(Request $request)
+    {
+        $request->session()->flush();
+        $request->session()->regenerate();
+        // $request->session()->forget('loginFlag');
         return Response::json(['success' => true, 'message' => 'Successfuly Logout', 'url' => $this->redirect_url]);
     }
 
@@ -222,6 +155,8 @@ class LoginController extends Controller
             return response()->json(['success' => 'True', 'message' => 'User exit into User_otp table', 'param' => 200]);
         }elseif($fetch_ueser_deatils == 3){
             return response()->json(['success' => 'True', 'message' => 'New OTP send to the user successfully', 'param' => 300]);
+        }elseif($fetch_ueser_deatils == 'Exist') {
+            return response()->json(['success' => 'False', 'error_message' => 'Username is already exist.', 'param' => 400]);
         }
     }
 
@@ -230,20 +165,18 @@ class LoginController extends Controller
 
         $check_otp = $this->user_model->cehckingOtp($otp);
 
-        if(count($check_otp) > 0){
-            return response()->json(['success' => 'True', 'param' => 100, 'user_details'=>$check_otp]);
-        }
         if(count($check_otp) == 0){
             return response()->json(['success' => 'False', 'param' => 404]);
+        }elseif(count($check_otp) > 0){
+            return response()->json(['success' => 'True', 'param' => 100, 'user_details'=>$check_otp]);
         }
+        
     }
 
     public function changePassword (Request $request) {
         $orderController   = new OrderController();
         $password = md5($request['data']['confirm_pw']);
         $email_id = $request['data']['user_email_id'];
-
-        $todays_date = CURR_DATE_TIME_EST;
 
         $condition = array(
             'email' => $email_id,
@@ -254,11 +187,12 @@ class LoginController extends Controller
 
         if(count($check_user_exit_or_not) === 0){
 
-
             $start_date = date('m/d/Y', strtotime('-3 months'));
             $end_date = date('m/d/Y', strtotime(CURR_DATE_TIME_EST)) ;
 
-             $request->request->add(['start_date' => $start_date, 'end_date' => $end_date, 'search_fields' => ['email'=>$email_id]]);
+             $request->request->add(['start_date' => $start_date, 'end_date' => $end_date, 'search_fields' => ['email'=>$email_id],'return_type' => "null" ]);
+
+             
 
             $response = json_decode($orderController->orderList($request));
             // print_r($response);
@@ -301,7 +235,7 @@ class LoginController extends Controller
         }
     }
 
-    public function basic_login (Request $request) {
+    public function basicLogin (Request $request) {
         $email = $request['data']['email'];
         $password = md5($request['data']['pw']);
 
@@ -316,9 +250,12 @@ class LoginController extends Controller
         if(!empty($check_user_exit_or_not)){
 
             $request->session()->put('loginFlag', 'logged_in');
-            return response()->json(['success' => 'True', 'message'=>"Login Successfuly'", 'url'=>$this->dashboard_url ]);
+            $request->session()->put('userid', $check_user_exit_or_not[0]->email);
+            $request->session()->put('login_type', $check_user_exit_or_not[0]->login_type);
+
+            return response()->json(['success' => true, 'message'=>"Login Successfuly'", 'url'=>$this->dashboard_url ]);
         }else{
-            return response()->json(['success' => 'False', 'error_message'=>"Username or Password is wrong."]);
+            return response()->json(['success' => false, 'error_message'=>"Username or Password is wrong.", 'param'=>404 ]);
         }
     }
 }

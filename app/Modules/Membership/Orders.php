@@ -6,10 +6,6 @@ use App\Modules\Membership\Membership;
 
 final class Orders extends Membership
 {
-    private $Limelight;
-	function __construct($apiInfo) {
-		$this->Limelight = Limelight::instance($apiInfo);
-	}
 
     /**
      *  @param $order_id
@@ -17,6 +13,9 @@ final class Orders extends Membership
      */
     public function get($order_id)
     {
+        if (empty($order_id)) {
+            throw new \Exception("Order ID is missing", 1);
+        }
         $response = $this->Limelight->getOrderDetail($order_id);
         return $this->response($response);
     }
@@ -26,9 +25,12 @@ final class Orders extends Membership
      *  @param $action first_name|last_name|shipping_state etc
      *  @param $value new value
      */
-    public function update($order_id, $action, $value)
+    public function update($order_id, $action, $value, $sync_all=0)
     {
-        $response = $this->Limelight->orderUpdate($order_id, $action, $value);
+        if (empty($order_id)) {
+            throw new \Exception("Order ID is missing", 1);
+        }
+        $response = $this->Limelight->orderUpdate($order_id, $action, $value, $sync_all);
         return $this->response($response);
     }
 
@@ -40,20 +42,29 @@ final class Orders extends Membership
      *  @return object|string $response
      */
 
-    public function find($start_date, $end_date, $criteria = 'all', $campaign_id = 'all', $product_id = 'all')
+    public function find($start_date, $end_date, $criteria = 'all', $return_type = 'order_view', $campaign_id = 'all', $product_id = 'all')
     {
-        $response = $this->Limelight->orderFind($start_date, $end_date, $campaign_id, $search_type = 'all', $return_type = 'order_view', $criteria, $start_time = '00:00:00', $end_time = "23:59:59", $product_id);
+        if ($start_date === '' || $end_date === '') {
+            throw new \Exception("Missing Required Fields", 1);
+        }
+        $response = $this->Limelight->orderFind($start_date, $end_date, $campaign_id, $search_type = 'all', $return_type, $criteria, $start_time = '00:00:00', $end_time = "23:59:59", $product_id);
         return $this->response($response);
     }
 
-    public function reProcess($order_id)
+    public function reprocess($order_id)
     {
+        if (empty($order_id)) {
+            throw new \Exception("Order ID is missing", 1);
+        }
         $response = $this->Limelight->orderReprocess($order_id);
         return $this->response($response);
     }
 
     public function void($order_id)
     {
+        if (empty($order_id)) {
+            throw new \Exception("Order ID is missing", 1);
+        }
         $response = $this->Limelight->orderVoid($order_id);
         return $this->response($response);
     }

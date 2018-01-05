@@ -52,12 +52,6 @@
 			return view === $location.path();
 		}
 
-		$scope.user = {
-			name : 'Poushali Bose',
-			email: 'poushali.bose@codeclouds.io',
-			img	 : 'https://lh4.googleusercontent.com/-hmSiUy3319Y/AAAAAAAAAAI/AAAAAAAAABs/6LekJKbeMYc/photo.jpg?sz=50'
-		}
-
 		/**
 		* NAME: name to show
 		* ICON: icon to show
@@ -81,7 +75,7 @@
 			'name' : 'Order Tracking',
 			'icon' : 'room',
 			'menu_id' : 2,
-			'href' : 'order_tracking',	
+			'href' : 'order-tracking',	
 		},
 		{
 			'name' : 'Account Settings',
@@ -95,7 +89,7 @@
 			{
 				'name' : 'Manage Addresses',
 				'menu_id' : 31,
-				'href' : ''
+				'href' : 'manage-addresses'
 			}]	
 		},
 		{

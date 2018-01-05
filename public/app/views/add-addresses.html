@@ -1,0 +1,47 @@
+<flat-button-directive url='#/manage-addresses' title='' type='back'  ></flat-button-directive>
+
+<div layout="column" layout-align="center">
+	<md-content class="e8e8e8">
+		<form name="AddressForm" ng-submit="SubmitForm()" novalidate>
+			<div md-whiteframe="3" layout-padding layout-margin  style="background: white">
+				<div layout="row">
+					<md-input-container flex>
+						<label for="city">City</label>
+						<input type="text" class="" name="city" ng-model="address.city"  ng-required="true">
+					</md-input-container>
+
+					<md-input-container flex>
+						<label for="zip">Zip/Postal</label>
+						<input type="text" class="" name="zip" ng-model="address.zip"  ng-required="true">
+					</md-input-container>
+				</div>
+				<div layout="row">
+					<md-input-container flex>
+						<label for="city">Country</label>
+						<input type="text" class="" name="country" ng-model="address.country"  ng-required="true">
+					</md-input-container>
+
+					<md-input-container flex>
+						<label for="zip">State</label>
+						<input type="text" class="" name="state" ng-model="address.state"  ng-required="true">
+					</md-input-container>
+				</div>
+				<div layout="row">
+					<md-input-container flex>
+						<label for="city">Address</label>
+						<div class="div-wrapper">
+							<textarea rows="5" name="my_address" ng-model="address.my_address" required></textarea>
+						</div>
+					</md-input-container>
+				</div>
+			</div>
+			<div md-whiteframe="3" layout-padding layout-margin  style="background: white">
+				<div layout="row" layout-align="end center">
+					<label for=""></label>
+					<md-button  type="submit" class="margin-left-0 md-primary" ng-disabled="AddressForm.$invalid || AddressForm.$submitted">Save</md-button>
+					<md-button class="margin-right-0" ng-click="goBack()">Cancel</md-button>
+				</div>
+			</div>
+		</form>
+	</md-content>
+</div>

@@ -25,27 +25,10 @@
 	rel="stylesheet">
 	<!-- Angular Material style sheet -->
 	<link rel="stylesheet" href="bower_components/angular-material/angular-material.min.css">
-	<style type="text/css">
-	.ctrl-btns .md-icon-button {}
-	[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-		display: none !important;
-	}
-	.pull-right{
-		text-align: right;
-	}
-	.zoom-body {
-		zoom: 90%;
-		/*background: red;*/
-	}
-	.f1f1f1 {
-		background: #f1f1f1;
-	}
-
-</style>
 <!-- endbuild -->
 
 </head>
-<body ng-app="memberByteApp" ng-controller="MainCtrl" class="zoom-body f1f1f1" ng-cloak>
+<body ng-app="memberByteApp" ng-controller="MainCtrl" class="zoom-body e8e8e8" ng-cloak>
 		<!--[if lte IE 8]>
 		  <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 		<![endif]-->
@@ -59,7 +42,7 @@
 			<div layout="row" class="md-toolbar-tools-bottom">
 				<md-list>
 					<md-list-item class="md-2-line ">
-						<img ng-src="{{user.img}}" class="toolbar-avatar md-avatar" alt="" />
+						<img ng-src="{{(user.profile_image) ? user.profile_image : 'images/default_user.png'}}" class="toolbar-avatar md-avatar" alt="" />
 						<div class="md-list-item-text" layout="column">
 							<div style="margin-top: 0px;font-size: 14px;font-weight: 600;">{{user.name}}</div>
 							<div>{{user.email}}</div>
@@ -120,14 +103,9 @@
 			<div flex="20"></div>
 		</div>
 	</md-toolbar>
-	<md-content  class="f1f1f1" scroll>
+	<md-content  class="e8e8e8" scroll>
 		<div layout="row" layout-align="center center">
 			<div ng-view flex="60"></div>
-		</div>
-
-		<div layout="row" layout-align="center" layout-padding>
-			<br><br>
-			<div>Created with <span style="color: #e611d4">❤</span> by CodeClouds</div>
 		</div>
 	</md-content>
 
@@ -161,8 +139,12 @@
 <script src="scripts/controllers/main.js"></script>
 <script src="scripts/controllers/dashboard.js"></script>
 <script src="scripts/controllers/orders.js"></script>
-<script src="scripts/controllers/tracking.js"></script>
+<script src="scripts/controllers/order-tracking.js"></script>
+<script src="scripts/controllers/profile-information.js"></script>
+<script src="scripts/controllers/manage-addresses.js"></script>
 <script src="scripts/services/toast.js"></script>
+<script src="scripts/services/dialog.js"></script>
+<script src="scripts/directives/flat-button-directive.js"></script>
 <!-- endbuild -->
 </body>
 </html>

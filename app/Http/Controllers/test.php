@@ -23,16 +23,29 @@ class test extends Controller
 			'username' => 'CISPLteam',
 			'password' => 'QxW9xxMuuZSyvb'
 		);
-		echo "Create Order ::";
+		// echo "Create Order ::";
 		$Orders = new Orders($apiInfo);
-		$res = $Orders->create(array('firstName' => 'abc', 'product_qty' => '2', 'productId' => 3));
-		echo "<pre>"; print_r($res); echo "</pre>";
-		echo "Get Customer Orders ::";
-		$res = $Orders->find('12/23/2017', '12/23/2017', 'email=test1@codeclouds.com');
-		echo "<pre>"; print_r(json_decode($res['data']['data'])); echo "</pre>";
-		echo "Get Order details ::";
-		$res = $Orders->get('218720');
-		echo "<pre>"; print_r($res); echo "</pre>";
+		
+        try {
+            // $res = $Orders->create(array('firstName' => 'abc', 'product_qty' => '2', 'productId' => 3));
+            // echo "<pre>"; print_r($res); echo "</pre>";
+            echo "Get Customer Orders ::";
+            $res = $Orders->get('216624');
+            echo "<pre>"; print_r($res); echo "</pre>";
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            echo "<br>".$e->getFile();
+            echo "<br>".$e->getLine();
+
+            // Helper::pr($ex->getMessage(), 1, 'Message');
+            // Helper::pr($ex->getFile(), 1, 'File');
+            // Helper::pr($ex->getLine(), 0, 'Line');
+        }
+		
+		
+		// echo "Get Order details ::";
+		// $res = $Orders->get('218720');
+		// echo "<pre>"; print_r($res); echo "</pre>";
 
     }
 

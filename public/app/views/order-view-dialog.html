@@ -1,0 +1,116 @@
+<md-dialog aria-label="Mango (Fruit)">
+  <!-- <md-toolbar> -->
+    <div layout="row" layout-padding class="order-detail-header">
+      <i class="material-icons">&#xE8CB;</i>
+      <span>Order Detail ({{order_id}})</span>
+      <span flex></span>
+      <span>Order Total : {{order_detail.order_total}}</span>
+      <md-button class="md-icon-button" ng-click="cancel()">
+        <i class="material-icons">&#xE5CD;</i>
+      </md-button>
+    </div>
+    <!-- </md-toolbar> -->
+
+    <md-dialog-content class="dialog-max-style">
+      <md-tabs md-dynamic-height md-border-bottom>
+
+       <md-tab label="Customer details">
+        <md-content class="md-padding dialog-max-style">
+          <div layout="row" layout-align="center center">
+            <md-list flex>
+              <md-list-item ng-repeat-start="(key, value) in customer_details">
+                <div flex="90">
+                  <h4>{{key}}</h4>
+                </div>
+                <div flex="90">
+                  <h4>{{ value }}</h4>
+                </div>
+              </md-list-item>
+              <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+            </md-list>
+          </div>
+        </md-content>
+      </md-tab>
+
+      <md-tab label="Product details">
+        <md-content class="md-padding dialog-max-style">
+         <div layout = "row" layout-padding>
+          <div flex><b>#</b></div>
+          <div flex><b>Name</b></div>
+          <div flex><b>Price</b></div>
+          <div flex><b>Product qty</b></div>
+          <div flex><b>Next Subscription Product</b></div>
+          <div flex><b>Recurring</b></div>
+          <div flex><b>Recurring Date</b></div>
+        </div>
+        <md-divider></md-divider>
+        <div layout = "row" layout-padding ng-repeat-start="(key, value) in products">
+          <div flex>{{key}}</div>
+          <div flex>{{value.name}}</div>
+          <div flex >{{value.price}}</div>
+          <div flex >{{value.product_qty}}</div>
+          <div flex >{{(value.next_subscription_product != "") ? value.next_subscription_product : 'N/A'}}</div>
+          <div flex >{{value.is_recurring}}</div>
+          <div flex >{{value.recurring_date}}</div>
+        </div>
+        <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+
+      </md-content>
+    </md-tab>
+
+    <md-tab label="Billing details">
+      <md-content class="md-padding dialog-max-style">
+       <div layout="row" layout-align="center center">
+        <md-list flex>
+          <md-list-item ng-repeat-start="(key, value) in billing_details">
+            <div flex="90">
+              <h4>{{key}}</h4>
+            </div>
+            <div flex="90">
+              <h4>{{ value }}</h4>
+            </div>
+          </md-list-item>
+          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+        </md-list>
+      </div>
+    </md-content>
+  </md-tab>
+  <md-tab label="Shipping details">
+    <md-content class="md-padding dialog-max-style">
+      <div layout="row" layout-align="center center">
+        <md-list flex>
+          <md-list-item ng-repeat-start="(key, value) in shipping_details">
+            <div flex="90">
+              <h4>{{key}}</h4>
+            </div>
+            <div flex="90">
+              <h4>{{ value }}</h4>
+            </div>
+          </md-list-item>
+          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+        </md-list>
+      </div>
+    </md-content>
+  </md-tab>
+
+  <md-tab label="Others">
+    <md-content class="md-padding dialog-max-style">
+      <div layout="row" layout-align="center center">
+        <md-list flex>
+          <md-list-item ng-repeat-start="(key, value) in other_details">
+            <div flex="90">
+              <h4>{{key}}</h4>
+            </div>
+            <div flex="90">
+              <h4>{{ value }}</h4>
+            </div>
+          </md-list-item>
+          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+        </md-list>
+      </div>
+    </md-content>
+  </md-tab>
+
+</md-tabs>
+</md-dialog-content>
+</md-dialog>

@@ -19,8 +19,7 @@ class Http
             $response = $response->getBody()->getContents();
             
         } catch (\Exception $ex) {
-            $response = $ex->getMessage();
-            return $response;
+            throw new \Exception($ex->getMessage(), 9999);
         }
         parse_str($response, $_response);
         return $_response;

@@ -12,6 +12,29 @@ i {
 	vertical-align: middle;
 	font-size: 24px;
 }
+.ctrl-btns .md-icon-button {}
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+	display: none !important;
+}
+.pull-right{
+	text-align: right;
+}
+.text-center{
+	text-align: center;
+}
+.zoom-body {
+	zoom: 90%;
+	/*background: red;*/
+}
+.f1f1f1 {
+	background: #f1f1f1;
+}
+.e8e8e8{
+	background: #e8e8e8;
+}
+.white-back{
+	background: white;
+}
 .margin-left-0{
 	margin-left: 0px !important;
 }
@@ -23,6 +46,9 @@ i {
 }
 .margin-bottom-0{
 	margin-bottom: 0px !important;
+}
+.margin-0{
+	margin: 0px !important;
 }
 .padding-left-0{
 	padding-left: 0px !important;
@@ -42,11 +68,16 @@ i {
 .margin-auto{
 	margin: auto;
 }
+.width-0{
+	min-width: auto !important;
+	width: auto !important;
+}
 div.layout-row:focus {
 	outline: none;
 }
 .selectedIndex {
-	color: rgb(21,101,192);
+	/*color: rgb(21,101,192);*/ /*blue*/
+	color: rgb(134, 134, 131) /*gray*/
 }
 md-list md-list-item.md-2-line .md-list-item-text h3.menu-text-h3{
 	color: inherit;
@@ -79,7 +110,24 @@ md-switch#switch1 {
 	padding: 150px 0px;
 }
 span.md-select-value:focus {
-    outline: none;
+	outline: none;
+}
+.yellow-divider{
+	border-top: 1px solid rgb(249, 179, 48);
+}
+.yellow-title-font{
+	color: #FFB300;
+	font-size: 18px;
+}
+.gray-font{
+	color: #848383;
+	font-size: 14px;
+}
+.dashed-gray-right-border{
+	border-right: 2px dashed #EEEEEE !important;
+}
+.md-button:not([disabled]):hover{
+	background-color: inherit;
 }
 /*search box*/
 .search_bar .md-errors-spacer
@@ -415,6 +463,11 @@ md-toolbar:not(.md-hue-1),
 	width: 64px !important;
 	height: 64px !important;
 }
+.user-avatar-big{
+	border-radius: 99%;
+	width: 120px !important;
+	height: 120px !important;
+}
 .user-email{
 	font-size: 12px;
 	font-weight: 500;
@@ -435,5 +488,19 @@ md-toolbar:not(.md-hue-1),
 }
 /*date range picker*/
 div.md-date-range-picker__select {
-    z-index: 100;
+	z-index: 100;
+}
+.md-date-range-picker__calendar__selected {
+	/*background: rgb(16, 108, 200);*/ /*blue*/
+	background: #FFB300 !important; /*amber-600*/
+}
+/*order view dialog*/
+.order-detail-header i, .order-detail-header span{
+	font-size: 16px;
+	font-weight: 500;
+}
+.dialog-max-style{
+	max-width:800px;
+	max-height:810px;
+	width:800px;
 }
