@@ -2,13 +2,13 @@
 
 /**
  * @ngdoc filter
- * @name codeBaseAdminApp.filter:changeCase
+ * @name memberByteApp.filter:changeCase
  * @function
  * @description
  * # changeCase
- * Filter in the codeBaseAdminApp.
+ * Filter in the memberByteApp.
  */
-angular.module('codeBaseAdminApp')
+angular.module('memberByteApp')
   .filter('changeCase', function () {
     return function (input) {
       

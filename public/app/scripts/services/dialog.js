@@ -40,14 +40,16 @@
  			'Street address 2' : (order_detail.shipping_street_address2 != "") ?  order_detail.shipping_street_address2 : 'N/A',
  			'Shipping Date' : order_detail.shipping_date,
  		};
- 		$scope.other_details = {
- 			'Campaign ID' : order_detail.campaign_id,
- 			'Order Confirmation' : order_detail.order_confirmed,
- 			'Total Ammount' : order_detail.order_total,
- 			'Shippable' : (order_detail.shippable === "1") ? 'YES' : 'NO',
- 			'Upsell Product Quantity' : (order_detail.upsell_product_quantity !== "") ? order_detail.upsell_product_quantity : 'N/A',
- 			'Tracking Number' : (order_detail.tracking_number !== "") ? order_detail.tracking_number : 'N/A' ,
- 		}
+ 		/*other details*/
+ 		// $scope.other_details = {
+ 		// 	'Campaign ID' : order_detail.campaign_id,
+ 		// 	'Order Confirmation' : order_detail.order_confirmed,
+ 		// 	'Total Ammount' : order_detail.order_total,
+ 		// 	'Shippable' : (order_detail.shippable === "1") ? 'YES' : 'NO',
+ 		// 	'Upsell Product Quantity' : (order_detail.upsell_product_quantity !== "") ? order_detail.upsell_product_quantity : 'N/A',
+ 		// 	'Tracking Number' : (order_detail.tracking_number !== "") ? order_detail.tracking_number : 'N/A' ,
+ 		// };
+ 		/*other details*/
  		$scope.products = order_detail.products;
 
  		$scope.cancel = function () {

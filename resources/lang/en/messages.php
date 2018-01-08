@@ -8,10 +8,10 @@ return [
     |
     |
     */
-    'welcome' => 'Welcome to our application',
     'LOGIN' => [
         'NO_ORDER_FOUND' => "Sorry. This email id don't have any orders.",
         'TRY_AGAIN_LATER' => "Sorry. Something went wrong. Please try again later.",
+        'SUCCESSFULL' => "Login Successfuly'",
     ],
 
     'OTP' => [
@@ -43,9 +43,9 @@ return [
     "LOGOUT" => [
         'LOGOUT' => 'Successfuly Logout'
     ],
+    'DEFAULT_ERROR_MESSAGE' => "Sorry. Something went wrong.",
 
-    "LOGIN" => [
-        'SUCCESSFULL' => "Login Successfuly'"
-    ]
-
+    "USER" => [
+        'PROFILE_UPDATE_FAILED' => 'Profile updation failed.',
+    ],
 ];

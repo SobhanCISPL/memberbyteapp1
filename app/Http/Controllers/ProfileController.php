@@ -17,16 +17,23 @@ class ProfileController extends Controller
 
 	public function edit(Request $request){
 		try{
-			$condition =  ['email' => $request->input('old_email')];
+			$condition =  ['email' => $request->input('old_email')];	
 			$values =  $request->input('submite_details');
-			$user_model = new User;
-			$user_detail = $user_model->updateUser('', $condition, $values);
+			$userModel = new User;
+			$userDetail = $userModel->updateUser('', $condition, $values);
+			if(!$userDetail){
+				return Response::json(['success' => false, 'error_message' => __('messages.USER.PROFILE_UPDATE_FAILED')]);
+			}
 			$request->session()->put('userid', $values['email']);
-			$data = $user_model->getUser(['email' => $values['email']], ['name', 'profile_image', 'email']);
+			$data = $userModel->getUser(['email' => $values['email']], ['name', 'profile_image', 'email']);
 			return Response::json(['success' => true, 'message' => 'Profile updated.', 'data' => $data]);
 		}
 		catch(Exception $ex){
-			return Response::json(['success' => false, 'error_message' => $ex->getMessage()]);
+			errorShow($ex);
+			return Response::json([
+				'success' => false, 
+				'error_message' => ($ex->getCode() == 999) ? $ex->getMessage() : __('messages.DEFAULT_ERROR_MESSAGE')
+			]);
 		}
 
 	}

@@ -1,13 +1,13 @@
 'use strict';
 /**
  * @ngdoc filter
- * @name codeBaseAdminApp.filter:capitalizeword
+ * @name memberByteApp.filter:capitalizeword
  * @function
  * @description
  * # capitalizeword
- * Filter in the codeBaseAdminApp.
+ * Filter in the memberByteApp.
  */
-angular.module('codeBaseAdminApp').filter('capitalizeword', function() {  
+angular.module('memberByteApp').filter('capitalizeword', function() {  
   return function(input){
     if(input.indexOf(' ') !== -1){
       var inputPieces,

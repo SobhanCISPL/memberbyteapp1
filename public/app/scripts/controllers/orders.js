@@ -7,7 +7,7 @@
  * Controller of the memberByteApp
  */
  angular.module('memberByteApp').controller('OrdersCtrl', function(
- 	$scope, $http, $location, Toast, $mdDateRangePicker, $filter, Dialog, $rootScope
+ 	$scope, $http, $location, Toast, $mdDateRangePicker, $filter, Dialog, $rootScope, ApiDataFactory
  	) {
  	var params, startDate, endDate, order_detail;
  	var lessThan3Day = new Date();
@@ -55,7 +55,7 @@
  			$scope.loader_circle = true;
  			$scope.loaded_content = false;
  			if(response.data.success === false){
- 				Toast.showToast(response.data.error_message);
+ 				Toast.showToast(response.data.message);
  				return false;
  			}
  			$scope.orders = response.data.data.order_ids;
@@ -63,11 +63,17 @@
  		});
  	}
 
+ 	$scope.getOrders();
+
  	$scope.viewOrder = function(order_id){
  		order_detail = $scope.orders_detail[order_id];
  		console.log(order_detail);
  		Dialog.showOrderViewDialog(order_id, order_detail);
  	} 
- 	$scope.getOrders();
+
+ 	ApiDataFactory.getOrderOptions().then(function (data) {
+ 		$scope.options = data.settings;
+		console.log(data);
+	});
 
  });

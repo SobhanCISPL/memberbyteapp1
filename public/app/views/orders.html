@@ -31,10 +31,21 @@
 				</md-card-title-media>
 			</md-card-title>
 			<md-card-actions layout="row" layout-align="end center" class="dashboard-card-actions">
-				<md-button class="md-icon-button" aria-label="Settings">
-					<md-tooltip md-direction="top" md-visible="tooltipVisible">More</md-tooltip>
-					<i class="material-icons">&#xE5CF;</i>
-				</md-button>
+				
+				<md-menu>
+					<md-button class="md-icon-button" aria-label="Settings" ng-click="$mdOpenMenu($event)">
+						<md-tooltip md-direction="top" md-visible="tooltipVisible">More</md-tooltip>
+						<i class="material-icons">&#xE5CF;</i>
+					</md-button>
+					<md-menu-content width="4">
+						<md-menu-item ng-repeat="option in options" >
+							<md-button ng-click="ctrl.redial($event)">
+								{{option.option_name}}
+							</md-button>
+						</md-menu-item>
+					</md-menu-content>
+				</md-menu>
+
 				<md-button class="md-icon-button" aria-label="Settings" ng-click="viewOrder(id)">
 					<md-tooltip md-direction="top" md-visible="tooltipVisible">View Order</md-tooltip>
 					<i class="material-icons">&#xE417;</i>

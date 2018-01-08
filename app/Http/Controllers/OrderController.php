@@ -58,6 +58,7 @@ class OrderController extends Controller
             //pr($response, 0);
             return json_encode($response);
         } catch (Exception $e) {
+           
             if (env('APP_DEBUG')) {
                 pr($e->getMessage(), 1, 'Message');
                 pr($e->getFile(), 1, 'File');

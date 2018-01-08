@@ -19,6 +19,9 @@
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	rel="stylesheet">
 
+	<script src="app/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="app/scripts/initial.js"></script>
+
 	<script type="text/javascript">
 		APP_MESSAGES = <?php echo json_encode(__('messages'));?>;
 		ERROR = <?php echo (isset($data) ? json_encode($data) : "''");?>;
@@ -67,7 +70,7 @@
 
 		<!-- build:js(.) scripts/vendor.js -->
 		<!-- bower:js -->
-		<script src="app/bower_components/jquery/dist/jquery.min.js"></script>
+		
 		<script src="app/bower_components/angular/angular.min.js"></script>
 		<script src="app/bower_components/angular-animate/angular-animate.min.js"></script>
 		<script src="app/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
@@ -77,6 +80,5 @@
 		<script src="app/bower_components/angular-aria/angular-aria.min.js"></script>
 		<!--angularjs-script-->
 		<script src="app/scripts/login.js"></script>
-		<script src="app/scripts/initial.js"></script>
 	</body>
 	</html>

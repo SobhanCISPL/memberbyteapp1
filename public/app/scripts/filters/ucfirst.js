@@ -1,13 +1,13 @@
 'use strict';
 /**
  * @ngdoc filter
- * @name codeBaseAdminApp.filter:ucfirst
+ * @name memberByteApp.filter:ucfirst
  * @function
  * @description
  * # ucfirst
- * Filter in the codeBaseAdminApp.
+ * Filter in the memberByteApp.
  */
-angular.module('codeBaseAdminApp')
+angular.module('memberByteApp')
 	.filter('ucfirst', function() {
 	    return function(input, scope) {
 	        if (input != null) {

@@ -1,6 +1,8 @@
 angular.module('memberByteLoginApp', [
 	'ngMaterial', 'ngSanitize', 'ngAnimate'
 	])
+.run(function ($http, $rootScope){
+})
 .config(function ($mdThemingProvider) {
 	$mdThemingProvider
 	.theme('default')
@@ -38,9 +40,32 @@ angular.module('memberByteLoginApp', [
 
 	};
 })
+.factory('ApiDataFactory', function ($http, $q) {
+	
+	return {
+		get: function () {
+			var deferred = $q.defer();
+			$http({
+				method: 'POST',
+				url: 'app/api-data',
+			}).then(function (response) {
+				deferred.resolve(response.data);
+			})
+			.catch(function (response) {
+				deferred.reject(response);
+			});
+			return deferred.promise;
+		}
+	}
+})
 
-.controller('LoginIndexCtrl', function ($scope, $mdDialog, $http, $mdToast, Toast, Dialog) {
+.controller('LoginIndexCtrl', function ($scope, $rootScope, $mdDialog, $http, $mdToast, Toast, Dialog, ApiDataFactory) {
 
+	// ApiDataFactory.get().then(function (data) {
+	// 	console.log(data);
+	// 	$scope.themeSettings = data.data.themeSettings;
+	// });
+	
 	if(ERROR !== '' && ERROR.success === false && ERROR.error_message != ''){
 		Dialog.alertDialog(ERROR.error_message);
 	}

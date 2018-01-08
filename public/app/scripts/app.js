@@ -71,7 +71,7 @@
 
  	$rootScope.$on('$routeChangeSuccess', function (event, current, previous) {
  		if (current.hasOwnProperty('$$route')) {
- 			$rootScope.page_title = current.$$route.title;
+ 			$rootScope.page_title = current.$$route.title; // page title set
  		}
  	});
 
@@ -84,7 +84,8 @@
  	});
 
  })
- .directive("scroll", function ($window) {
+ //'scroll' directive for shadow effect on scroll
+ .directive("scroll", function ($window) { 
  	return function (scope, element, attrs) {
  		var head = angular.element(document.getElementsByClassName("head-toolbar"));
  		element.on("scroll", function () {
@@ -96,4 +97,23 @@
  			}
  		});
  	};
- });
+ })
+  //merchant data from 201clicks
+.factory('ApiDataFactory', function ($http, $q) {
+	
+	return {
+		getOrderOptions: function () {
+			var deferred = $q.defer();
+			$http({
+				method: 'POST',
+				url: 'api-data/order-options',
+			}).then(function (response) {
+				deferred.resolve(response.data);
+			})
+			.catch(function (response) {
+				deferred.reject(response);
+			});
+			return deferred.promise;
+		}
+	}
+});

@@ -1,4 +1,7 @@
 <?php
+
+use Illuminate\Support\Facades\Mail;
+
 if(!function_exists('pr')){
 	function pr($param = array(), $continue = true, $label = NULL){
 		if (!empty($label))
@@ -45,5 +48,34 @@ if(!function_exists('objToArray')){
 			return json_decode(json_encode($obj), true);
 		}
 		return false;
+	}
+}
+
+if(!function_exists('sendEmail')){
+	function sendEmail ($email='',$data=[]) {
+		try{
+
+			Mail::send('email.otp', $data, function($message) use ($email) {
+	            $message->from(env('MAIL_USERNAME'),'Code Clouds Developer');
+
+	            $message->to($email)->subject('Login OTP!');           
+	        });
+	        return 1;
+
+		}catch(\Exception $e){
+
+		    return response()->json(['code'=>500,'message'=>'error']);
+		}
+	}
+}
+
+if(!function_exists('errorShow')){
+	function errorShow($ex)
+	{
+		if (env('APP_DEBUG')) {
+			pr($ex->getMessage(), 1, 'Message');
+			pr($ex->getFile(), 1, 'File');
+			pr($ex->getLine(), 0, 'Line');
+		}
 	}
 }

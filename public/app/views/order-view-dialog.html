@@ -15,14 +15,14 @@
       <md-tabs md-dynamic-height md-border-bottom>
 
        <md-tab label="Customer details">
-        <md-content class="md-padding dialog-max-style">
-          <div layout="row" layout-align="center center">
+        <md-content class="dialog-max-style">
+          <div layout="row" layout-padding layout-align="center center">
             <md-list flex>
               <md-list-item ng-repeat-start="(key, value) in customer_details">
-                <div flex="90">
+                <div flex="50">
                   <h4>{{key}}</h4>
                 </div>
-                <div flex="90">
+                <div flex="50">
                   <h4>{{ value }}</h4>
                 </div>
               </md-list-item>
@@ -33,57 +33,41 @@
       </md-tab>
 
       <md-tab label="Product details">
-        <md-content class="md-padding dialog-max-style">
-         <div layout = "row" layout-padding>
-          <div flex><b>#</b></div>
-          <div flex><b>Name</b></div>
-          <div flex><b>Price</b></div>
-          <div flex><b>Product qty</b></div>
-          <div flex><b>Next Subscription Product</b></div>
-          <div flex><b>Recurring</b></div>
-          <div flex><b>Recurring Date</b></div>
+        <md-content class="dialog-max-style">
+          <div layout-padding>
+           <div layout = "row" layout-padding>
+            <div flex><b>#</b></div>
+            <div flex><b>Name</b></div>
+            <div flex><b>Price</b></div>
+            <div flex><b>Product qty</b></div>
+            <div flex><b>Next Subscription Product</b></div>
+            <div flex><b>Recurring</b></div>
+            <div flex><b>Recurring Date</b></div>
+          </div>
+          <md-divider></md-divider>
+          <div layout = "row" layout-padding ng-repeat-start="(key, value) in products">
+            <div flex>{{key}}</div>
+            <div flex>{{value.name}}</div>
+            <div flex >{{value.price}}</div>
+            <div flex >{{value.product_qty}}</div>
+            <div flex >{{(value.next_subscription_product != "") ? value.next_subscription_product : 'N/A'}}</div>
+            <div flex >{{value.is_recurring}}</div>
+            <div flex >{{value.recurring_date}}</div>
+          </div>
+          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
         </div>
-        <md-divider></md-divider>
-        <div layout = "row" layout-padding ng-repeat-start="(key, value) in products">
-          <div flex>{{key}}</div>
-          <div flex>{{value.name}}</div>
-          <div flex >{{value.price}}</div>
-          <div flex >{{value.product_qty}}</div>
-          <div flex >{{(value.next_subscription_product != "") ? value.next_subscription_product : 'N/A'}}</div>
-          <div flex >{{value.is_recurring}}</div>
-          <div flex >{{value.recurring_date}}</div>
-        </div>
-        <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
-
       </md-content>
     </md-tab>
 
     <md-tab label="Billing details">
-      <md-content class="md-padding dialog-max-style">
-       <div layout="row" layout-align="center center">
+      <md-content class="dialog-max-style">
+       <div layout="row" layout-padding layout-align="center center">
         <md-list flex>
           <md-list-item ng-repeat-start="(key, value) in billing_details">
-            <div flex="90">
+            <div flex="50">
               <h4>{{key}}</h4>
             </div>
-            <div flex="90">
-              <h4>{{ value }}</h4>
-            </div>
-          </md-list-item>
-          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
-        </md-list>
-      </div>
-    </md-content>
-  </md-tab>
-  <md-tab label="Shipping details">
-    <md-content class="md-padding dialog-max-style">
-      <div layout="row" layout-align="center center">
-        <md-list flex>
-          <md-list-item ng-repeat-start="(key, value) in shipping_details">
-            <div flex="90">
-              <h4>{{key}}</h4>
-            </div>
-            <div flex="90">
+            <div flex="50">
               <h4>{{ value }}</h4>
             </div>
           </md-list-item>
@@ -93,15 +77,15 @@
     </md-content>
   </md-tab>
 
-  <md-tab label="Others">
-    <md-content class="md-padding dialog-max-style">
-      <div layout="row" layout-align="center center">
+  <md-tab label="Shipping details">
+    <md-content class="dialog-max-style">
+      <div layout="row" layout-padding layout-align="center center">
         <md-list flex>
-          <md-list-item ng-repeat-start="(key, value) in other_details">
-            <div flex="90">
+          <md-list-item ng-repeat-start="(key, value) in shipping_details">
+            <div flex="50">
               <h4>{{key}}</h4>
             </div>
-            <div flex="90">
+            <div flex="50">
               <h4>{{ value }}</h4>
             </div>
           </md-list-item>
@@ -110,6 +94,24 @@
       </div>
     </md-content>
   </md-tab>
+
+ <!--  <md-tab label="Others">
+    <md-content class="dialog-max-style">
+      <div layout="row" layout-padding layout-align="center center">
+        <md-list flex>
+          <md-list-item ng-repeat-start="(key, value) in other_details">
+            <div flex="50">
+              <h4>{{key}}</h4>
+            </div>
+            <div flex="50">
+              <h4>{{ value }}</h4>
+            </div>
+          </md-list-item>
+          <md-divider ng-repeat-end ng-show='{{$last ? false : true}}'></md-divider>
+        </md-list>
+      </div>
+    </md-content>
+  </md-tab> -->
 
 </md-tabs>
 </md-dialog-content>
