@@ -12,13 +12,16 @@ return [
         'NO_ORDER_FOUND' => "Sorry. This email id don't have any orders.",
         'TRY_AGAIN_LATER' => "Sorry. Something went wrong. Please try again later.",
         'SUCCESSFULL' => "Login Successfuly'",
+        'EMAIL_FIELD_BLANK' => "Email ID can't be left blank!",
     ],
 
     'OTP' => [
         'SEND_OTP' => "OTP send to the user successfully",
         'NEW_OTP_SEND' => "New OTP send to the user successfully",
         'ERROR_OTP' => "Please provide valid OTP",
-        'BLANK' => "OTP field can't be left blank!"
+        'BLANK' => "OTP field can't be left blank!",
+        'OTP_SEND' => "OTP send to the user successfully. Please check inbox.",
+        'OTP_VERIFIED' => 'OTP successfuly verified',
     ],
 
     'USER_EXIST' => [
@@ -47,5 +50,10 @@ return [
 
     "USER" => [
         'PROFILE_UPDATE_FAILED' => 'Profile updation failed.',
+    ],
+
+    'API_201CLICKS' => [
+        'SUCCESSFULL_FETCHING' => 'Data fetched successfuly.',
+        'SUB_DOMAIN_NOT_EXISTS' => '',
     ],
 ];

@@ -36,8 +36,16 @@ angular.module('memberByteLoginApp', [
 				.ariaLabel('Alert')
 				.ok('Okay!')
 				);
+		},
+		confirmDialog: function (title,content) {
+			return $mdDialog.show(
+			$mdDialog.confirm()
+			.title(title)
+			.textContent(content)
+			.ariaLabel('Confirmation')
+			.ok('Okay')
+			);
 		}
-
 	};
 })
 .factory('ApiDataFactory', function ($http, $q) {
@@ -69,6 +77,7 @@ angular.module('memberByteLoginApp', [
 	if(ERROR !== '' && ERROR.success === false && ERROR.error_message != ''){
 		Dialog.alertDialog(ERROR.error_message);
 	}
+	var userEmail = '', loginDetail = [];
 
 	$scope.thirdPartyLogin = function(login_driver){
 		$http.post('login', {type:login_driver})
@@ -104,66 +113,44 @@ angular.module('memberByteLoginApp', [
 							},
 							controller: DialogController
 						});
-						function DialogController($scope, $mdDialog, $location, $mdToast, $http, Toast) {
+						function DialogController($scope, $mdDialog, $location, $mdToast, $http, Toast, Dialog) {
 
 							$scope.send_otp = function (ev) {
+
 								if(!$scope.username){
-									Toast.showToast("Email ID can't be left blank!");
+									Toast.showToast(APP_MESSAGES.LOGIN.EMAIL_FIELD_BLANK);
 									
 									$scope.loader = false; // loader hide
 									$scope.dialog = false; 
 
 									return false;
 								}else{
+									userEmail = $scope.username;
 									$scope.isDisabled = true;
 
 									$scope.loader = true; // loader hide
 									$scope.dialog = true; 
 
-									$http.post('/check_user', {
+									$http.post('/check-user', {
 										data:$scope.username
 									}).then(function(response){
-										if(response.data.param == '100' || response.data.param == 200 || response.data.param == 300){
+										if(response.data.success === false){
+											Dialog.confirmDialog('Sorry!', response.data.error_message);
 											$scope.isDisabled = false;
-
-											$mdDialog.show({
-												title: 'OTP Varification',	
-												parent: parentEl,
-												targetEvent: $event,
-												templateUrl: 'app/views/otp-varification.html',
-												locals: {
-													otp: $scope.otp,
-												},
-												controller: DialogController
-											});
+											return false;
 										}
-
-										if(response.data.param == 400) {
-											var confirm = $mdDialog.confirm()
-											.title('Sorry!')
-											.textContent(response.data.error_message)
-											.ariaLabel('Lucky day')
-											.targetEvent(ev)
-											.ok('Okay');
-
-											$mdDialog.show(confirm).then(function() {
-												$scope.isDisabled = false; 
-												// location.reload();
-											});
-										}
-
-										if(response.data.param == 404) {
-											var confirm = $mdDialog.confirm()
-											.textContent(response.data.error_message)
-											.ariaLabel('Lucky day')
-											.targetEvent(ev)
-											.ok('Okay');
-
-											$mdDialog.show(confirm).then(function() {
-												$scope.isDisabled = false; 
-												// location.reload();
-											});
-										}
+										loginDetail = response.data.data;
+										$mdDialog.show({
+											title: 'OTP Varification',	
+											parent: parentEl,
+											targetEvent: $event,
+											templateUrl: 'app/views/otp-varification.html',
+											locals: {
+												otp: $scope.otp,
+											},
+											controller: DialogController
+										});
+										/**/
 									});
 								}								
 							}
@@ -178,37 +165,34 @@ angular.module('memberByteLoginApp', [
 									$scope.loader = true; // loader hide
 									$scope.dialog = true;
 
-									$http.post('/check_otp', {
-										data:$scope.otp
+									$http.post('/check-otp', 
+									{
+										'otp' : $scope.otp,
+										'email' : userEmail
 									}).then(function(response){
 
-										if(response.data.param == "100"){
+										if(response.data.success === false){
+											Toast.showToast(response.data.error_message);
 											$scope.isDisabled = false;
-
-											email_id = response.data.user_details[0].email_id;
-
-											$mdDialog.show({
-												title: 'Generate Password',	
-												parent: parentEl,
-												targetEvent: $event,
-												templateUrl: 'app/views/set-password.html',
-												locals: {
-													new_password: $scope.new_password,
-													confirm_password: $scope.confirm_password
-												},
-												controller: DialogController
-											});
-										}
-
-										if(response.data.param == 404){
-											Toast.showToast(APP_MESSAGES.OTP.ERROR_OTP);
-											$scope.isDisabled = false;
-
 											$scope.loader = false; // loader hide
 											$scope.dialog = false; 
-
 											return false;
 										}
+										$scope.isDisabled = false;
+
+										email_id = response.data.user_details[0].email_id;
+
+										$mdDialog.show({
+											title: 'Generate Password',	
+											parent: parentEl,
+											targetEvent: $event,
+											templateUrl: 'app/views/set-password.html',
+											locals: {
+												new_password: $scope.new_password,
+												confirm_password: $scope.confirm_password
+											},
+											controller: DialogController
+										});
 									});
 								}
 							}
@@ -218,11 +202,12 @@ angular.module('memberByteLoginApp', [
 									Toast.showToast(APP_MESSAGES.PASSWORD.BLANK);
 									return false;
 								}else{
+									console.log(loginDetail);
 									var pw = $scope.new_password;
 									var confirm_pw = $scope.confirm_password;
 									var user_email_id = email_id;
 
-									if(pw  != confirm_pw){
+									if(pw != confirm_pw){
 										Toast.showToast(APP_MESSAGES.PASSWORD.WARNING);
 										return false;
 									}else{
@@ -230,56 +215,16 @@ angular.module('memberByteLoginApp', [
 										$scope.loader = true; // loader hide
 										$scope.dialog = true; 
 
-
-										$http.post('/change_password',{
+										$http.post('/change-password',{
 											data:{
-												"confirm_pw": confirm_pw,
-												"user_email_id": user_email_id
+												"confirm_pw" : confirm_pw,
+												"user_email_id" : user_email_id,
+												"login_detail" : loginDetail,
 											}
 										}).then(function(response){
-											if(response.data.param == 100){
-												
-												var confirm = $mdDialog.confirm()
-												.title('Confirmation!')
-												.textContent(response.data.message)
-												.ariaLabel('Lucky day')
-												.targetEvent(ev)
-												.ok('Okay');
-
-												$mdDialog.show(confirm).then(function() {
-													$scope.isDisabled = false; 
-													// location.reload();
-												});
-											}
-
-											if(response.data.param == 200){
-
-												var confirm = $mdDialog.confirm()
-												.title('Confirmation!')
-												.textContent(response.data.message)
-												.ariaLabel('Lucky day')
-												.targetEvent(ev)
-												.ok('Okay');
-
-												$mdDialog.show(confirm).then(function() {
-													$scope.isDisabled = false; 
-													// location.reload();
-												});
-											}
-
-											if(response.data.param == 333){
-
-												var confirm = $mdDialog.confirm()
-												.title('Sorry!')
-												.textContent(response.data.error_message)
-												.ariaLabel('Lucky day')
-												.targetEvent(ev)
-												.ok('Okay');
-
-												$mdDialog.show(confirm).then(function() {
-													$scope.isDisabled = false; 
-													// location.reload();
-												});
+											if(response.data.success == true){
+												Dialog.confirmDialog('Confirmation', response.data.message);
+												$scope.isDisabled = false;
 											}
 										});
 									}
@@ -305,7 +250,7 @@ angular.module('memberByteLoginApp', [
 										location.href = url;
 									}
 
-									if(response.data.param == 404){
+									if(response.data.success == false){
 										Toast.showToast(response.data.error_message);
 										$scope.isDisabled = false;
 

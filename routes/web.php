@@ -9,9 +9,9 @@
 /*Before login*/
 Route::get('/', 'LoginController@index');
 Route::post('login', 'LoginController@login');
-Route::post('/check_user', 'LoginController@checkUser');
-Route::post('/check_otp', 'LoginController@checkOtp');
-Route::post('/change_password', 'LoginController@changePassword');
+Route::post('/check-user', 'LoginController@checkUser');
+Route::post('/check-otp', 'LoginController@checkOtp');
+Route::post('/change-password', 'LoginController@changePassword');
 Route::post('/basic-login' , 'LoginController@basicLogin');
 
 /*After login*/
@@ -22,7 +22,7 @@ Route::post('app/user-edit', 'ProfileController@edit');
 
 /*201clicks data related*/
 Route::post('app/api-data' , 'ApiController@sessionStor');
-Route::post('app/api-data/order-options' , 'ApiController@orderOptions');
+Route::post('app/order-options' , 'OrderController@orderOptions');
 
 /*test routes*/
 Route::get('/test',['as' => 'test', 'uses' => 'OrderController@findorder']);

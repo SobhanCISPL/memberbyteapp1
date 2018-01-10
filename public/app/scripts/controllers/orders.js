@@ -15,15 +15,16 @@
 
  	$scope.loaded_content = true; // loader
  	
- 	lessThan3Day.setDate(lessThan3Day.getDate() - 2);
+ 	lessThan3Day.setDate(lessThan3Day.getDate() - 9);
+
  	$scope.customTemplates = [
  	{
- 		name: 'Last 3 Days',
+ 		name: 'Last 10 Days',
  		dateStart: lessThan3Day,
  		dateEnd: toDay,
  	}
  	];
- 	$scope.pickerModel = { selectedTemplate: 'Last 3 Days' };
+ 	$scope.pickerModel = { selectedTemplate: 'Last 10 Days' };
  	startDate = $filter('date')(lessThan3Day, 'MM/dd/yyyy');
  	endDate = $filter('date')(toDay, 'MM/dd/yyyy');
 
@@ -35,9 +36,9 @@
  			},
  		};
 
- 	$rootScope.$on('user-detail-fetched', function(){
- 		console.log($rootScope.user.email);
- 	});	
+ 	// $rootScope.$on('user-detail-fetched', function(){
+ 	// 	console.log($rootScope.user.email);
+ 	// });	
  	
  	$scope.orderFilter=function(){
  			startDate = $filter('date')($scope.pickerModel.dateStart, 'MM/dd/yyyy');
@@ -52,6 +53,7 @@
  		$scope.loader_circle = false;
  		$http.post('orders', params)
  		.then(function (response) {
+ 			
  			$scope.loader_circle = true;
  			$scope.loaded_content = false;
  			if(response.data.success === false){
@@ -73,7 +75,11 @@
 
  	ApiDataFactory.getOrderOptions().then(function (data) {
  		$scope.options = data.settings;
-		console.log(data);
 	});
 
+	/*handle options*/
+	$scope.optionTrigger = function($key){
+		console.log($scope.options);
+		console.log($scope.options[$key]);
+	}
  });

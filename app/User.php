@@ -5,7 +5,6 @@ namespace App;
 use DB;
 use Exception;
 use App\Email\Email;
-// use App\Helpers\Helpers as Helper;
 
 class User
 {
@@ -94,18 +93,21 @@ class User
      */
     public function updateUser($query='', $condition=[], $values)
     {
-
-        if($query === ''){
-            $query = DB::table($this->table);
-        }
-
-        if(!empty($condition)){
-            foreach($condition as $key => $value){
-                $query->where($key, $value);
+        try{
+            if($query === ''){
+                $query = DB::table($this->table);
             }
+            if(!empty($condition)){
+                foreach($condition as $key => $value){
+                    $query->where($key, $value);
+                }
+            }
+            return $query->update($values);
         }
-
-        return $query->update($values);
+        catch (Illuminate\Database\QueryException $ex)
+        {
+            throw new Exception($ex->getMessage());
+        }
     }
 
     public function updateUserForOtpTable($query='', $condition=[], $values)
@@ -126,106 +128,43 @@ class User
     public function checkingUser($email)
     {
         try{
-            $result = false;
+            $result = true;
             $values = [];
+            $insertOrUpdate = 1; // insert -> 1, update -> 2
+            $currentTime = time();
+            $emailFire = false;
+            $data = ['otp' => rand(111111,999999)];
             $query = DB::table($this->userOtpTable);
             $condition = ['email_id' => $email];
             $user = $this->checkUserInOtpTable($condition);
-
-            //check user with user table
-            $condition1 = ['email' => $email ];
-            $user1 = $this->getUser($condition1);
-            //end
-            
-            $rand = rand(111111,999999);
-
-            if(count($user) === 0){
-                if(count($user1) === 0){
-                    $data = array('otp'=>$rand);
-                    $mail = sendEmail($email,$data);
-                    if(!empty($mail)){
-                        $values = [
-                            'email_id' => $email,
-                            'otp' => $rand,
-                            'created_at' => CURR_DATE_TIME_EST
-                        ];
-                        $result = $this->insertUser($query, $values);
-
-                        return 1;
-                    }
-                }elseif(count($user1) > 0){
-                    if($user1[0]->login_type == 3){
-                        $data = array('otp'=>$rand);
-                        $mail = sendEmail($email,$data);
-                        if(!empty($mail)){
-                            $values = [
-                                'email_id' => $email,
-                                'otp' => $rand,
-                                'created_at' => CURR_DATE_TIME_EST
-                            ];
-                            $result = $this->insertUser($query, $values);
-
-                            return 1;
-                        }
-                    }else{
-                        return "Exist";
-                    }
-                }
- 
-            }elseif (count($user) > 0) {
-                if(count($user1) === 0){
-                    if (time() - strtotime($user[0]->created_at) > 60*60*24) {
-                        $data = array('otp'=>$rand);
-                        $mail = sendEmail($email,$data);
-                        if(!empty($mail)){
-                            $user = json_decode(json_encode($user),1);
-                            $values = [
-                                'otp' => $rand,
-                                'created_at' => CURR_DATE_TIME_EST
-                            ];
-                            $condition = ['id' => $user[0]['id']];
-                            $result = $this->updateUserForOtpTable($query, $condition, $values);
-
-                            if($result){
-                                return 3;
-                            }
-                        }
-                    }else {
-                        return 2;
-                    }
-                }elseif(count($user1) > 0) {
-                    if($user1[0]->login_type == 3){
-                        if (time() - strtotime($user[0]->created_at) > 60*60*24) {
-                            $data = array('otp'=>$rand);
-                            $mail = sendEmail($email,$data);
-                            if(!empty($mail)){
-                                $user = json_decode(json_encode($user),1);
-                                $values = [
-                                    'otp' => $rand,
-                                    'created_at' => CURR_DATE_TIME_EST
-                                ];
-                                $condition = ['id' => $user[0]['id']];
-                                $result = $this->updateUserForOtpTable($query, $condition, $values);
-
-                                if($result){
-                                    return 3;
-                                }
-                            }
-                        }else {
-                            return 2;
-                        }
-                    }else{
-                        return "Exist";
-                    }
+            $values = [
+                'otp' => $data['otp'],
+                'created_at' => CURR_DATE_TIME_EST
+            ];
+            if(count($user) > 0 && ($currentTime - strtotime($user[0]->created_at) > 60*60*24)){
+                $emailFire = true;
+                $insertOrUpdate = 2; 
+            }
+            if(count($user) == 0){
+                $values['email_id'] = $email;
+                $emailFire = true;
+            }
+            if(count($user) > 0 && ($currentTime - strtotime($user[0]->created_at) < 60*60*24)){
+                return $result;
+            }
+            $mail = sendEmail($email,$data);
+            if(!empty($mail)){
+                $result = ($insertOrUpdate === 1) 
+                ? $this->insertUser($query, $values) 
+                : $this->updateUserForOtpTable($query, $condition, $values);
+                if($result){
+                    return $result;
                 }
             }
-
-            
-
+            return false;
         }catch(Exception $ex){
             throw new Exception($ex->getMessage(), $ex->getCode());
         }
-        
     }
 
     /**
@@ -248,63 +187,45 @@ class User
         return $query->get()->toArray();
     }
 
-    public function cehckingOtp ($otp) 
+    public function checkingOtp ($otp, $email) 
     {
+        $result = false;
+        $values = [];
         try{
-            $result = false;
-            $values = [];
             $query = DB::table($this->userOtpTable);
-            $condition = ['otp' => $otp ];
+            $condition = ['otp' => $otp, 'email_id' => $email];
             $user_otp_matched = $this->checkUserInOtpTable($condition);
             return $user_otp_matched;
 
         }catch(Exception $ex){
-            throw new Exception($ex->getMessage(), $ex->getCode());
+            throw new Exception($ex->getMessage());
         }
-        
     }
 
-    public function basicLoginUserChecking ($password,$email_id,$first_name='',$last_name='') 
+    public function basicLoginUserChecking ($password, $email, $user_detail = [], $user_flag) 
     {
         try{
-            $pw = $password;
-            $email = $email_id;
-
             $result = false;
             $values = [];
             $query = DB::table($this->table);
-            $condition = ['email' => $email, 'login_type' => 3];
-            $user = $this->getUser($condition);
-
-            if(count($user) === 0 ){
+            $condition = ['email' => $email, 'login_type' => 3]; 
+            if($user_flag == 1){
                 $values = [
-                    'name' => $first_name.' '.$last_name,
+                    'name' => $user_detail['first_name'].' '.$user_detail['last_name'],
                     'email' => $email,
                     'login_type' => 3,
-                    'password' => $pw,
+                    'password' => $password,
                     'created_at' => CURR_DATE_TIME_EST
                 ];
                 $result = $this->insertUser($query, $values);
-                if($result){
-                    return 1;
-                }
-            }elseif(count($user) > 0){
-                $user = json_decode(json_encode($user),1);
-                $values = [
-                    'password' => $pw
-                ];
-                $condition = ['id' => $user[0]['id']];
-                $result = $this->updateUser($query, $condition, $values);
-
-                if(!empty($result)){
-                    return 2;
-                }
             }
-
+            else{
+                $result = $this->updateUser($query, $condition, ['password' => $password]);
+            }
+            return $result;
         }catch(Exception $ex){
-            throw new Exception($ex->getMessage(), $ex->getCode());
-        }
-        
+            throw new Exception($ex->getMessage());
+        }  
     }
 
     /**

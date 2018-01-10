@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Modules\Membership\Orders;
 use App\Modules\Membership\Gateway;
 use Illuminate\Http\Request;
+use Response;
+use Session;
 use Exception;
 
 class OrderController extends Controller
@@ -64,8 +66,7 @@ class OrderController extends Controller
                 pr($e->getFile(), 1, 'File');
                 pr($e->getLine(), 0, 'Line');
             }
-        }
-        
+        }   
     }
     public function orderList(Request $request)
     {
@@ -131,7 +132,7 @@ class OrderController extends Controller
                 }
                 $response = $_response;
             }
-            //pr($response, 0);
+            // pr($response, 0);
             return json_encode($response);
         } catch (Exception $e) {
             if (env('APP_DEBUG')) {
@@ -140,7 +141,6 @@ class OrderController extends Controller
                 pr($e->getLine(), 0, 'Line');
             }
         }
-
     }
 
     public function orderUpdate($order_id = '218737,218737', $action = 'first_name,last_name', $value = 'test7,test2', $sync_all = 0)
@@ -153,7 +153,8 @@ class OrderController extends Controller
         pr($response, 0);
     }
 
-    private function __commaSeperatedString($input = []) {
+    private function __commaSeperatedString($input = []) 
+    {
     	$output = "";
 		if (is_array($input) && !empty($input)) {
             foreach ($input as $key => $value) {
@@ -162,5 +163,58 @@ class OrderController extends Controller
             $output = rtrim($output, ',');
         }
         return $output;
+    }
+
+    /**
+     * Get order options from 201clicks data / static session data
+     *
+     * @param
+     * @return json
+    */
+    public function orderOptions()
+    {
+        try{
+            $sessionData = Session::get('settings', []);
+
+            $settings = [];
+            array_walk($sessionData, function (&$val, $key) use (&$settings)
+            {
+                if(!empty($val)){
+                    if($key == 'trialExtensionSetting'){
+                        $settings[$key] = [
+                            'option_name' => 'Trial Extension',
+                            'enable' => $val['extend_trial_applied'],
+                            'auto_approve' => $val['extend_trial_auto'],
+                        ];
+                    }
+                    if($key == 'refundSetting'){
+                        $settings[$key] = [
+                            'option_name' => 'Refund',
+                            'enable' => $val['claim_refund_applied'],
+                            'auto_approve' => $val['claim_refund_auto'],
+                        ];
+                    }
+                }
+            }); 
+            return Response::json(['success' => true, 'message' => '', 'settings' => $settings]);
+        }
+        catch(Exception $ex){
+            return Response::json(['success' => false, 'error_message' => ($ex->getCode === 999) ? $ex->getMessage() : __('messages.DEFAULT_ERROR_MESSAGE')]);
+        }
+    }
+
+    /**
+     * order option trigger
+     *
+     * @param
+     * @return json
+    */
+    public function optionTrigger(Request $request){
+        try{
+            pr($request,0);
+        }
+        catch(Exception $ex){
+            return Response::json(['success' => false, 'error_message' => ($ex->getCode() === 999) ? $ex->getMessage() : '']);
+        }
     }
 }

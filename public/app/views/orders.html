@@ -38,8 +38,8 @@
 						<i class="material-icons">&#xE5CF;</i>
 					</md-button>
 					<md-menu-content width="4">
-						<md-menu-item ng-repeat="option in options" >
-							<md-button ng-click="ctrl.redial($event)">
+						<md-menu-item ng-repeat="(key, option) in options" >
+							<md-button ng-click="optionTrigger(key)">
 								{{option.option_name}}
 							</md-button>
 						</md-menu-item>

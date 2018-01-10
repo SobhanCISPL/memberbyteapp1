@@ -16,10 +16,10 @@
                             <label for="otp">
                                 OTP
                             </label>
-                            <input name="otp" ng-model="otp" required="" type="text" ng-maxlength="6" ng-pattern="/^[0-9]*$/"/>
+                            <input name="otp" ng-model="otp" required="" type="text" ng-maxlength="6" ng-minlength="6" ng-pattern="/^[0-9]*$/"/>
 
                             <div class="hint">
-                                <span class="help-block" ng-show="OtpForm.otp.$error.pattern || OtpForm.otp.$error.maxlength && (!OtpForm.$pristine || OtpForm.$submitted)">OTP must be numeric & 6 digits</span><br>
+                                <span class="help-block" ng-show="OtpForm.otp.$error.pattern || OtpForm.otp.$error.maxlength || OtpForm.otp.$error.minlength && (!OtpForm.$pristine || OtpForm.$submitted)">OTP must be numeric & 6 digits</span><br>
                             </div>
                             
 

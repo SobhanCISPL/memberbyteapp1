@@ -106,7 +106,7 @@
 			var deferred = $q.defer();
 			$http({
 				method: 'POST',
-				url: 'api-data/order-options',
+				url: 'order-options',
 			}).then(function (response) {
 				deferred.resolve(response.data);
 			})

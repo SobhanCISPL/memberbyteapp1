@@ -9,8 +9,6 @@ use Session;
 use URL;
 use App\SocialLogin\SocialLogin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SendOTP;
 use App\Http\Controllers\OrderController;
 
 class LoginController extends Controller
@@ -50,7 +48,7 @@ class LoginController extends Controller
                     return redirect($this->dashboardUrl);
                 }
             }
-            /* google / facebook - after redirection */
+            /* start - google / facebook - after redirection */
             if ($request->has('code')) {
                 $this->driver = $request->session()->get('login_driver');
                 $detail = $this->SocialLogin->getUser($this->driver);
@@ -75,6 +73,7 @@ class LoginController extends Controller
                     return redirect($this->dashboardUrl);
                 }
             }
+            /* end - google / facebook - after redirection */
             return view('index');
         } catch (Exception $ex) {
             $request->session()->forget('login_driver');
@@ -151,12 +150,11 @@ class LoginController extends Controller
     }
 
     /**
-     * check user order / then send OTP & EMAIL/ After 24 hours sending new OTP & Email.
+     * Flush user session
      *
      * @param
-     * @return view / json
+     * @return json
      */
-
     public function userSessionForget($request)
     {
         $request->session()->forget('login_flag');
@@ -168,151 +166,123 @@ class LoginController extends Controller
 
     public function checkUser (Request $request) 
     {
-        $email_to = $request['data'];
-        $userDetail = array(
-            'email' => $email_to
-        );
+        try{
+            $email_to = $request['data'];
+            $userDetail = ['email' => $email_to];
+            $orderDetails =[];
+            $check_email_in_user_table = $this->userModel->getUser($userDetail); 
+            $userCountFlag = count($check_email_in_user_table) === 0 || 
+            (count($check_email_in_user_table) > 0 && $check_email_in_user_table[0]->login_type == 3) 
+            ? 1 : 0;
 
-        $response = $this->getTotalOrders($userDetail, $request);
-
-        if($response['total_order'] == 0){
-
-            return response()->json(['success' => false, 'error_message' => $response['error_message'], 'param' => 404]);
-            
-        }elseif ($response['total_order'] > 0) {
-
-            $fetch_ueser_deatils = $this->userModel->checkingUser($email_to);
-
-            if($fetch_ueser_deatils == 1){
-                return response()->json(['success' => 'True', 'message' => __('messages.OTP.SEND_OTP'), 'param' => 100]);
-            }elseif($fetch_ueser_deatils == 2){
-                return response()->json(['success' => 'True', 'message' => __('messages.USER_EXIST.USER_EXIST'), 'param' => 200]);
-            }elseif($fetch_ueser_deatils == 3){
-                return response()->json(['success' => 'True', 'message' => __('messages.OTP.NEW_OTP_SEND'), 'param' => 300]);
-            }elseif($fetch_ueser_deatils == 'Exist') {
-                return response()->json(['success' => 'False', 'error_message' => __('messages.USER_EXIST.EMAILID_EXIST'), 'param' => 400]);
+            if($userCountFlag == 0){
+                return Response::json(['success' => false, 'error_message' => __('messages.USER_EXIST.EMAILID_EXIST')]);
             }
+            $oldUserCheck = (count($check_email_in_user_table) > 0) ? 1 : 0; //if user exists or not in user table
+            $data = ['user_detail' => [], 'user_flag' => 2]; //user_flag : 1->create user, 2->update user; (DO NOT REMOVE)
+            if($oldUserCheck === 0){
+                $orderDetails = $this->getTotalOrders($userDetail, $request);
+
+                if($orderDetails['total_order'] == 0){
+                    return response()->json(['success' => false, 'error_message' => $orderDetails['error_message']]);
+                }
+                $data['user_detail'] = $orderDetails['user_details'];
+                $data['user_flag'] = 1 ;
+            }
+
+            $response = $this->userModel->checkingUser($email_to);
+            if($response === false){
+                return Response::json(['success' => false, 'error_message' => __('messages.DEFAULT_ERROR_MESSAGE')]);
+            }
+            return Response::json(['success' => true, 'message' => __('messages.OTP.OTP_SEND'), 
+                'data' => $data ]);
+        }
+        catch (Exception $ex) {
+            if (env('APP_DEBUG')) {
+                pr($ex->getMessage(), 1, 'Message');
+                pr($ex->getFile(), 1, 'File');
+                pr($ex->getLine(), 0, 'Line');
+            }
+            return Response::json(['success' => false, 'error_message' => ($ex->getCode() == 999) ? $ex->getMessage() : '']);
         }
     }
-    /**
-     * check OTP varification.
-     *
-     * @param
-     * @return view / json
-     */
+
     public function checkOtp (Request $request) 
     {
-        $otp = $request['data'];
+        $otp = $request['otp'];
+        $email = $request['email'];
 
-        $check_otp = $this->userModel->cehckingOtp($otp);
+        $check_otp = $this->userModel->checkingOtp($otp, $email);
 
         if(count($check_otp) == 0){
-            return response()->json(['success' => 'False', 'param' => 404]);
-        }elseif(count($check_otp) > 0){
-            return response()->json(['success' => 'True', 'param' => 100, 'user_details'=>$check_otp]);
+            return Response::json(['success' => false, 'error_message' => __('messages.OTP.ERROR_OTP')]);
         }
+        return Response::json(['success' => true, 'message' => __('message.OTP.OTP_VERIFIED'), 'user_details' => $check_otp]);
     }
 
-    /**
-     * change password . If user not exist then insert & is exist then just update password.
-     *
-     * @param
-     * @return view / json
-     */
     public function changePassword (Request $request) 
     {
-        $password = md5($request['data']['confirm_pw']);
-        $email_id = $request['data']['user_email_id'];
-
-        $userDetail = array(
-            'email' => $email_id
-        );
-
-        $condition = array(
-            'email' => $email_id,
-            'login_type' => 3
-        );
-        $check_user_exit_or_not = $this->userModel->getUser($condition);
-
-
-        if(count($check_user_exit_or_not) === 0){
-
-            $response = $this->getTotalOrders($userDetail, $request);
-
-            $order_id = $response['order_details']['order_ids'][0];
-            $first_name = $response['order_details']['order_details'][$order_id]['first_name'];
-            $last_name = $response['order_details']['order_details'][$order_id]['last_name'];
-
-            $check_user_for_normal_login = $this->userModel->basicLoginUserChecking($password,$email_id,$first_name,$last_name);
-
-            if($check_user_for_normal_login == 1){
-
+        try{
+            $password = md5($request['data']['confirm_pw']);
+            $email_id = $request['data']['user_email_id'];
+            $user_detail = $request['data']['login_detail']['user_detail'];
+            $user_flag = $request['data']['login_detail']['user_flag']; //user create:1 or update:2 (DO NOT REMOVE)
+            $userDetail = ['email' => $email_id];
+            $condition = array(
+                'email' => $email_id,
+                'login_type' => 3
+            );
+            $user_table_update = $this->userModel->basicLoginUserChecking($password,$email_id,$user_detail, $user_flag);
+            if($user_table_update !== false){
                 $delet_register_user_from_otp_table = $this->userModel->deleteUser($email_id);
                 if($delet_register_user_from_otp_table){
-                    return response()->json(['success' => "true", 'param' => 200, 'message'=>__('messages.REGISTER.SUCCESSFULL_REGISTER') ]);
+                    return response()->json(['success' => true, 
+                        'message'=>($user_flag == 1) ?__('messages.REGISTER.SUCCESSFULL_REGISTER') : __('messages.REGISTER.UPDATE_PW')]);
                 }
             }
         }
-
-        if(count($check_user_exit_or_not) > 0){
-
-            $check_user_for_normal_login = $this->userModel->basicLoginUserChecking($password,$email_id);
-
-            if($check_user_for_normal_login == 2){
-
-                $delet_register_user_from_otp_table = $this->userModel->deleteUser($email_id);
-                if($delet_register_user_from_otp_table){
-                    return response()->json(['success' => "true", 'param' => 100, 'message'=>__('messages.REGISTER.UPDATE_PW') ]);
-                }
-                
+        catch (Exception $ex) {
+            if (env('APP_DEBUG')) {
+                pr($ex->getMessage(), 1, 'Message');
+                pr($ex->getFile(), 1, 'File');
+                pr($ex->getLine(), 0, 'Line');
             }
+            return Response::json(['success' => false, 'error_message' => ($ex->getCode() == 999) ? $ex->getMessage() : '']);
         }
     }
 
-    /**
-     * Auithenticate user basic login with email & password.
-     *
-     * @param
-     * @return view / json
-     */
     public function basicLogin (Request $request) 
     {
-        $email = $request['data']['email'];
-        $password = md5($request['data']['pw']);
-
-        $condition = array(
-            'email' => $email,
-            'password' => $password,
-            'login_type' => 3
-        );
-
-        $check_user_exit_or_not = $this->userModel->getUser($condition);
-       
-
-        if(!empty($check_user_exit_or_not)){
-            $user_id = $check_user_exit_or_not[0]->id;
+        try{
+            $email = $request['data']['email'];
+            $password = md5($request['data']['pw']);
             $condition = array(
-                'id' => $user_id
+                'email' => $email,
+                'password' => $password,
+                'login_type' => 3
             );
-
-            $values = array (
-                'last_loggedin_at' => CURR_DATE_TIME_EST
-            ) ;
-
-            $update_last_login_status = $this->userModel->updateUser('', $condition, $values);
-
-            if($update_last_login_status){
-
-                $request->session()->put('login_flag', 'logged_in');
-                $request->session()->put('userid', $check_user_exit_or_not[0]->email);
-                $request->session()->put('login_type', $check_user_exit_or_not[0]->login_type);
-
-                return response()->json(['success' => true, 'message'=>__('messages.LOGIN.SUCCESSFULL'), 'url'=>$this->dashboardUrl ]); 
+            $check_user_exit_or_not = $this->userModel->getUser($condition);
+            if(!empty($check_user_exit_or_not)){
+                $user_id = $check_user_exit_or_not[0]->id;
+                $condition = ['id' => $user_id];
+                $values = ['last_loggedin_at' => CURR_DATE_TIME_EST];
+                $update_last_login_status = $this->userModel->updateUser('', $condition, $values);
+                if($update_last_login_status){
+                    $request->session()->put('login_flag', 'logged_in');
+                    $request->session()->put('userid', $check_user_exit_or_not[0]->email);
+                    $request->session()->put('login_type', $check_user_exit_or_not[0]->login_type);
+                    return response()->json(['success' => true, 'message'=>__('messages.LOGIN.SUCCESSFULL'), 'url'=>$this->dashboardUrl ]); 
+                }
             }
-
-            
-        }else{
-            return response()->json(['success' => false, 'error_message'=>__('messages.ERROR_LOGIN.LOGIN_ERROR'), 'param'=>404 ]);
+            return response()->json(['success' => false, 'error_message'=>__('messages.ERROR_LOGIN.LOGIN_ERROR')]);
+        }
+        catch (Exception $ex) {
+            if (env('APP_DEBUG')) {
+                pr($ex->getMessage(), 1, 'Message');
+                pr($ex->getFile(), 1, 'File');
+                pr($ex->getLine(), 0, 'Line');
+            }
+            return Response::json(['success' => false, 'error_message' => ($ex->getCode() == 999) ? $ex->getMessage() : '']);
         }
     }
 
@@ -325,13 +295,11 @@ class LoginController extends Controller
      * @return array
      */
 
-    private function getTotalOrders($userDetail, $request)
+   private function getTotalOrders($userDetail, $request, $saveSession = false)
     {
-
         $startDate = date('m/d/Y', strtotime(THREE_MONTHS_BACK_DATE_TIME_EST));
         $endDate = date('m/d/Y', strtotime(CURR_DATE_TIME_EST)) ;
         $return = [];
-
         $request->request->add(
             [
                 'start_date' => $startDate, 
@@ -339,9 +307,7 @@ class LoginController extends Controller
                 'search_fields' => ['email' => $userDetail['email']],
                 'return_type' => "null" 
             ]);
-
         $response = json_decode($this->orderController->orderList($request), true);
-
         if(isset($response['success']) && $response['success'] === false){
             $return = ['success' => false, 'error_message' => '', 'total_order' => 0, 'error_code' => 999];
             if($response['data']['response_code'] == 333){
@@ -352,14 +318,16 @@ class LoginController extends Controller
             }
             return $return;
         }
+        $order_id = $response['data']['order_ids'][0];
+        $first_name = $response['data']['order_details'][$order_id]['first_name'];
+        $last_name = $response['data']['order_details'][$order_id]['last_name'];
         
         $return = [
             'success' => true, 
             'message' => 'Order fetched', 
             'total_order' => count($response['data']['order_ids']),
-            'order_details' => $response['data']
+            'user_details' => ['first_name' => $first_name, 'last_name' => $last_name],
         ];
-
         return $return;
     }
 }
