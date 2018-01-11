@@ -155,7 +155,7 @@ angular.module('memberByteLoginApp', [
 								}								
 							}
 
-							$scope.send_otp_varify = function (ev){
+							$scope.send_otp_verify = function (ev){
 								if(!$scope.otp){
 									Toast.showToast(APP_MESSAGES.OTP.BLANK);
 									return false;

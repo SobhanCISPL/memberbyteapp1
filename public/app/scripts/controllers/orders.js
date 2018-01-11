@@ -53,7 +53,8 @@
  		$scope.loader_circle = false;
  		$http.post('orders', params)
  		.then(function (response) {
- 			
+ 			// console.log(response);
+ 			// return false;
  			$scope.loader_circle = true;
  			$scope.loaded_content = false;
  			if(response.data.success === false){
@@ -73,9 +74,22 @@
  		Dialog.showOrderViewDialog(order_id, order_detail);
  	} 
 
- 	ApiDataFactory.getOrderOptions().then(function (data) {
- 		$scope.options = data.settings;
-	});
+ // 	ApiDataFactory.getOrderOptions().then(function (data) {
+ // 		$scope.options = data.settings;
+	// });
+
+	$scope.orderOption = function (order_id) {
+		// console.log($scope.orders_detail[order_id]);
+		$http.post('order-options', {
+			data:{
+				order_details:$scope.orders_detail[order_id]
+			}
+		}).then(function(response){
+			if(response.data.success == true){
+				$scope.options = response.data.settings;
+			}
+		});
+	}
 
 	/*handle options*/
 	$scope.optionTrigger = function($key){

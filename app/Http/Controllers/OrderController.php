@@ -53,6 +53,7 @@ class OrderController extends Controller
                     'shippable'                => $response['data']['shippable'],
                     'products'                 => $response['data']['products'],
                     'tracking_number'              =>  $response['data']['tracking_number'],
+                    'order_place_date'         => $response['data']['acquisition_date']
 
                 );
                 $response = $_response;
@@ -80,7 +81,7 @@ class OrderController extends Controller
                 $_response['data']['order_ids'] = $orderIds;
 
                 $allOrders = json_decode($response['data']['data'], true);
-                //pr($allOrders, 0);
+                // pr($allOrders, 0);
 
                 $gateway_ids = array_column($allOrders, 'gateway_id');
                 $gateway_ids = implode(',', $gateway_ids);
@@ -128,6 +129,7 @@ class OrderController extends Controller
                         'currency'                 => $_gateway[$orderDetails['gateway_id']]['gateway_currency'],
                         'products'                 => $orderDetails['products'],
                         'tracking_number'              =>  $orderDetails['tracking_number'],
+                        'order_place_date'         => $orderDetails['acquisition_date']
                     );
                 }
                 $response = $_response;
@@ -171,13 +173,18 @@ class OrderController extends Controller
      * @param
      * @return json
     */
-    public function orderOptions()
+    public function orderOptions(Request $request)
     {
+
         try{
             $sessionData = Session::get('settings', []);
 
+            $order_details = $request['data']['order_details'];
+            $datediff = time() - strtotime($order_details['order_place_date']);
+            $no_of_days =  floor($datediff / (60 * 60 * 24));
+
             $settings = [];
-            array_walk($sessionData, function (&$val, $key) use (&$settings)
+            array_walk($sessionData, function (&$val, $key) use (&$settings,$no_of_days)
             {
                 if(!empty($val)){
                     if($key == 'trialExtensionSetting'){
@@ -194,6 +201,18 @@ class OrderController extends Controller
                             'auto_approve' => $val['claim_refund_auto'],
                         ];
                     }
+                    
+                    if($key == 'rmaSetting'){
+                        if($no_of_days <= $val['return_days_allowed']){
+                            $settings[$key] = [
+                                'option_name' => 'Return',
+                                'return_address' => $val['return_address'],
+                                // 'auto_approve' => $no_of_days,
+                            ];
+                        }
+                        
+                    }
+
                 }
             }); 
             return Response::json(['success' => true, 'message' => '', 'settings' => $settings]);

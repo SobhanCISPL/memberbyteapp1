@@ -102,18 +102,18 @@
 .factory('ApiDataFactory', function ($http, $q) {
 	
 	return {
-		getOrderOptions: function () {
-			var deferred = $q.defer();
-			$http({
-				method: 'POST',
-				url: 'order-options',
-			}).then(function (response) {
-				deferred.resolve(response.data);
-			})
-			.catch(function (response) {
-				deferred.reject(response);
-			});
-			return deferred.promise;
-		}
+		// getOrderOptions: function () {
+		// 	var deferred = $q.defer();
+		// 	$http({
+		// 		method: 'POST',
+		// 		url: 'order-options',
+		// 	}).then(function (response) {
+		// 		deferred.resolve(response.data);
+		// 	})
+		// 	.catch(function (response) {
+		// 		deferred.reject(response);
+		// 	});
+		// 	return deferred.promise;
+		// }
 	}
 });
